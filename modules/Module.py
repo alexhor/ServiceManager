@@ -111,7 +111,7 @@ class Module:
         self._prepareTemplateFile()
         call(['docker-compose', '-f', self.tmpConfigFile, 'down'])
         # Configure haproxy
-        self.subDomain.haproxyConfig()
+        self.subDomain.haproxyConfig(True)
 
     def clean(self):
         """Delete all existing data"""

@@ -51,7 +51,6 @@ class SubDomain:
 
     def deleteModule(self):
         """Delete the domains module if exists"""
-        self.haproxyConfig(delete=True)
         if self.activeModule is not None:
             self.activeModule.clean()
         self.activeModule = None
@@ -73,7 +72,7 @@ class SubDomain:
         outputBuffer = ''
         aclName = self.name.replace('.', '-')
 
-        # compose haproxy.cfg
+        # Compose haproxy.cfg
         with open(self._haproxyConfigFile, 'r+') as haproxyCfg:
             isBackend = False
             isFrontend = False
@@ -81,26 +80,27 @@ class SubDomain:
 
             for line in haproxyCfg:
                 lineStrip = line.strip()
-                # new backend started
+                # New backend started
                 if lineStrip[:8] == 'backend ':
-                    # check if this is the correct block
+                    # Check if this is the correct block
                     isFrontend = False
                     isBackend = lineStrip[8:] == aclName
                     # Delete backend by default
                     if isBackend:
                         prevLine = line
                         continue
-                # new frontend started
+                # New frontend started
                 elif lineStrip[:9] == 'frontend ':
                     isBackend = False
-                    # check if this is the correct block
+                    # Check if this is the correct block
                     isFrontend = lineStrip[9:] == 'http'
-                # special handling for backend
+                # Special handling for backend
                 elif isBackend:
                     # Delete backend by default
-                    prevLine = line
-                    continue
-                # special handling for frontend
+                    if line != '# END OF SERVICES\n':
+                        prevLine = line
+                        continue
+                # Special handling for frontend
                 elif isFrontend:
                     # Make sure the subdomains ssl certificate is beeing loaded
                     if '\tbind *:80\n' == prevLine:
@@ -121,27 +121,27 @@ class SubDomain:
                             # Remove the old line
                             prevLine = line
                             continue
-                    # delete old server lines
+                    # Delete old server lines
                     elif lineStrip[:len('acl ' + aclName) + 1] == 'acl ' + aclName + ' ' \
                             or lineStrip[:len('use_backend ' + aclName)] == 'use_backend ' + aclName:
                         prevLine = line
                         continue
-                    # add new server lines at the end
+                    # Add new server lines at the end
                     elif not delete and line == '\t# END OF SERVICES\n':
                         outputBuffer += '\tacl ' + aclName + ' req.hdr(Host) ' + self.name + '\n'
                         outputBuffer += '\tuse_backend ' + aclName + ' if ' + aclName + '\n'
-                # add a new backend rule if it doesn't exist
+                # Add a new backend rule if it doesn't exist
                 elif line == '# END OF SERVICES\n' and not delete:
                     outputBuffer += 'backend ' + aclName + '\n' \
                                     + '\toption httpclose\n' \
                                     + '\toption forwardfor\n' \
                                     + '\thttp-request set-header X-Forwarded-Port %[dst_port]\n' \
                                     + '\thttp-request add-header X-Forwarded-Proto https if { ssl_fc }\n' \
-                                    + '\tserver ' + self.activeModule.name + ' 127.0.0.1:' + self.activeModule.exposedPort + ' check fall 3 rise 2\n'
-                # write accepted lines
+                                    + '\tserver ' + self.activeModule.name + ' 127.0.0.1:' + str(self.activeModule.exposedPort) + ' check fall 3 rise 2\n'
+                # Write accepted lines
                 outputBuffer += line
                 prevLine = line
-        # write new haproxy.cfg
+        # Write new haproxy.cfg
         #print(outputBuffer)
         with open(self._haproxyConfigFile, 'w') as haproxyCfg:
             haproxyCfg.write(outputBuffer)
@@ -175,7 +175,3 @@ class SubDomain:
                 certFile.write(fullchain.read())
             with open(join(keyDir, 'privkey.pem'), 'r') as privkey:
                 certFile.write(privkey.read())
-
-
-# // TODO: configure haproxy
-# // TODO: configure letsencrypt
