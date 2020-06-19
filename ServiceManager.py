@@ -6,8 +6,8 @@ from os.path import isfile, join
 from Domain import Domain
 from modules.WordPress import WordPress
 
-class DockerCompose:
-    """A docker-compose interface"""
+class ServiceManager:
+    """A docker-compose interface to manage web services"""
     # The top level directory
     rootDir = join('/', 'var', 'www', 'services')
     # A list of directories to ignore when looking for domains
@@ -56,9 +56,12 @@ class DockerCompose:
 if __name__ == '__main__':
     if __package__ is None:
         __package__ = "docker-compose"
-    composer = DockerCompose()
-    domain = composer.domain('h-software.de')
-    testSubDomain = domain.subDomain('blog')
-    wordpressModule = WordPress(testSubDomain)
-    #wordpressModule.clean()
-    wordpressModule.up()
+    manager = ServiceManager()
+    domain = manager.domain('h-software.de')
+    blog = domain.subDomain('blog')
+    main = domain.subDomain('h-software.de')
+    domain.delete()
+    blogWp = WordPress(blog)
+    mainWp = WordPress(main)
+    blogWp.up()
+    mainWp.up()
