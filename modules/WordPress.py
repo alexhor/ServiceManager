@@ -16,8 +16,8 @@ class WordPress(Module):
         """Put all requried parameters into an .env file in the subdomains root directory"""
         self.exposedPort = self.getFreePort()
         with open(self.envFile, 'w') as envFile:
-            envFile.write('DOMAIN=' + self.subDomain.__str__() + '\n')
-            envFile.write('HTTP_PORT=' + self.exposedPort.__str__() + '\n')
+            envFile.write('DOMAIN_ESCAPED=' + str(self.subDomain).replace('.', '-') + '\n')
+            envFile.write('HTTP_PORT=' + str(self.exposedPort) + '\n')
             envFile.write('DOMAIN_PATH=' + self.subDomain.rootDir + '\n')
             envFile.write('MYSQL_PASSWORD=' + self.password() + '\n')
             envFile.write('MYSQL_ROOT_PASSWORD=' + self.password() + '\n')

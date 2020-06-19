@@ -75,7 +75,7 @@ class Domain:
         Args:
             name (subDomain): The subdomain to delete
         """
-        name = subDomain.__str__()
+        name = str(subDomain)
         # Delete the subdomain
         subDomain.delete()
         # Forget about the subdomain
@@ -83,8 +83,9 @@ class Domain:
 
     def delete(self):
         """Delete this top level domain"""
+        subDomainList = list(self.subDomains.values())
         # Delete all subdomains
-        for subDomain in self.subDomains:
+        for subDomain in subDomainList:
             self.deleteSubDomain(subDomain)
         # Delete the top level domain itself
         rmtree(self.rootDir, ignore_errors=True)

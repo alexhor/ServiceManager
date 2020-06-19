@@ -1,32 +1,38 @@
 # docker-compose file for a WordPress installation
 
-version: '3.3'
+version: '3.5'
 
 services:
-   db:
-     container_name: ${DOMAIN}_mysql
+   ${DOMAIN_ESCAPED}_db:
+     container_name: ${DOMAIN_ESCAPED}_mysql
      environment:
        MYSQL_DATABASE: wordpress
        MYSQL_USER: wordpress
        MYSQL_PASSWORD: ${MYSQL_PASSWORD}
        MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
      image: mysql:5.7
+     networks:
+       - ${DOMAIN_ESCAPED}
      restart: always
      volumes:
        - ${DOMAIN_PATH}/mysql:/var/lib/mysql
 
-   wordpress:
-     container_name: ${DOMAIN}_wordpress
+   ${DOMAIN_ESCAPED}_wordpress:
+     container_name: ${DOMAIN_ESCAPED}_wordpress
      depends_on:
-       - db
+       - ${DOMAIN_ESCAPED}_db
      environment:
        WORDPRESS_DB_HOST: db:3306
        WORDPRESS_DB_USER: wordpress
        WORDPRESS_DB_NAME: wordpress
        WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD}
      image: wordpress:latest
+     networks:
+       - ${DOMAIN_ESCAPED}
      ports:
        - "${HTTP_PORT}:80"
      restart: always
      volumes:
        - ${DOMAIN_PATH}/wordpress:/var/www/html
+networks:
+    ${DOMAIN_ESCAPED}:
