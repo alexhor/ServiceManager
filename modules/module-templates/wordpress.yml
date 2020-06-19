@@ -13,7 +13,7 @@ services:
      image: mysql:5.7
      restart: always
      volumes:
-       - db:/var/lib/mysql
+       - ${DOMAIN_PATH}/mysql:/var/lib/mysql
 
    wordpress:
      container_name: ${DOMAIN}_wordpress
@@ -29,17 +29,4 @@ services:
        - "${HTTP_PORT}:80"
      restart: always
      volumes:
-       - wordpress:/var/www/html
-volumes:
-  db:
-    driver: local
-    driver_opts:
-      device: ${DOMAIN_PATH}/mysql
-      o: bind
-      type: none
-  wordpress:
-    driver: local
-    driver_opts:
-      device: ${DOMAIN_PATH}/wordpress
-      o: bind
-      type: none
+       - ${DOMAIN_PATH}/wordpress:/var/www/html
