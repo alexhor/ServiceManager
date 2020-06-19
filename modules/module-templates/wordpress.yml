@@ -22,7 +22,7 @@ services:
      depends_on:
        - ${DOMAIN_ESCAPED}_db
      environment:
-       WORDPRESS_DB_HOST: db:3306
+       WORDPRESS_DB_HOST: ${DOMAIN_ESCAPED}_db:3306
        WORDPRESS_DB_USER: wordpress
        WORDPRESS_DB_NAME: wordpress
        WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD}
