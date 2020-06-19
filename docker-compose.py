@@ -58,7 +58,7 @@ if __name__ == '__main__':
         __package__ = "docker-compose"
     composer = DockerCompose()
     domain = composer.domain('h-software.de')
-    testSubDomain = domain.subDomain('h-software.de')
+    testSubDomain = domain.subDomain('blog')
     wordpressModule = WordPress(testSubDomain)
     #wordpressModule.clean()
     wordpressModule.up()

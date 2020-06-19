@@ -117,7 +117,7 @@ class SubDomain:
                             continue
                         elif certString not in line:
                             # Add the domains ssl certificate
-                            outputBuffer += line + certString + '\n'
+                            outputBuffer += '\t' + lineStrip + certString + '\n'
                             # Remove the old line
                             prevLine = line
                             continue
@@ -128,14 +128,10 @@ class SubDomain:
                         continue
                     # add new server lines at the end
                     elif not delete and line == '\t# END OF SERVICES\n':
-                        if prevLine != '\t# SERVICES\n':
-                            outputBuffer += '\n'
                         outputBuffer += '\tacl ' + aclName + ' req.hdr(Host) ' + self.name + '\n'
                         outputBuffer += '\tuse_backend ' + aclName + ' if ' + aclName + '\n'
                 # add a new backend rule if it doesn't exist
                 elif line == '# END OF SERVICES\n' and not delete:
-                    if prevLine != '# SERVICES\n':
-                        outputBuffer += '\n'
                     outputBuffer += 'backend ' + aclName + '\n' \
                                     + '\toption httpclose\n' \
                                     + '\toption forwardfor\n' \
@@ -170,7 +166,8 @@ class SubDomain:
         # Request a certificate for the first time
         call(['certbot', 'certonly', '--standalone', '-d', self.name, '--non-interactive', '--agree-tos',
                 '--email', 'alexander@h-software.de', '--http-01-port=8888'])
-        makedirs(certFolder)
+        if not isdir(certFolder):
+            makedirs(certFolder)
         # Create combined certificate file for haproxy to use
         keyDir = join('/', 'etc', 'letsencrypt', 'live', self.name)
         with open(self._sslCertificateFile, 'w') as certFile:
