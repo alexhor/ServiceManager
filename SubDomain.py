@@ -142,7 +142,6 @@ class SubDomain:
                 outputBuffer += line
                 prevLine = line
         # Write new haproxy.cfg
-        #print(outputBuffer)
         with open(self._haproxyConfigFile, 'w') as haproxyCfg:
             haproxyCfg.write(outputBuffer)
         # Load new configuration

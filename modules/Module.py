@@ -33,9 +33,9 @@ class Module:
         # Tell the subdomain about this module
         self.subDomain.AddModule(self)
         # Get the http port if it exists
-        envFileDict = self.envFileToDict()
-        if 'HTTP_PORT' in envFileDict.keys():
-            self.exposedPort = envFileDict['HTTP_PORT']
+        self.envFileDict = self.envFileToDict()
+        if 'HTTP_PORT' in self.envFileDict.keys():
+            self.exposedPort = self.envFileDict['HTTP_PORT']
 
     def password(self, length = 255):
         """Generate a secure password

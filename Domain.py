@@ -9,7 +9,7 @@ from SubDomain import SubDomain
 class Domain:
     """A top level domain"""
     # A list of all default folders
-    defaultFolderList = ('httpdocs',)
+    defaultFolderList = ('',)
     # A list of directories to ignore when looking for subdomains
     nonDomainDirs = ('bin', 'tmp')
 
