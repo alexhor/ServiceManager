@@ -1,0 +1,156 @@
+version: '3.5'
+
+services:
+  ${DOMAIN_ESCAPED}_zammad-backup:
+    command: ["zammad-backup"]
+    container_name: ${DOMAIN_ESCAPED}_zammad-backup
+    depends_on:
+      - ${DOMAIN_ESCAPED}_zammad-railsserver
+    entrypoint: /usr/local/bin/backup.sh
+    environment:
+      - BACKUP_SLEEP=86400
+      - HOLD_DAYS=10
+      - POSTGRESQL_USER=${POSTGRES_USER}
+      - POSTGRESQL_PASSWORD=${POSTGRES_PASSWORD}
+      - ELASTICSEARCH_HOST=${DOMAIN_ESCAPED}_zammad-elasticsearch
+      - MEMCACHED_HOST=${DOMAIN_ESCAPED}_zammad-memcached
+      - ZAMMAD_RAILSSERVER_HOST=${DOMAIN_ESCAPED}_zammad-railsserver
+      - ZAMMAD_WEBSOCKET_HOST=${DOMAIN_ESCAPED}_zammad-websocket
+      - POSTGRESQL_HOST=${DOMAIN_ESCAPED}_zammad-postgresql
+    image: ${IMAGE_REPO}:zammad-postgresql${VERSION}
+    links:
+      - ${DOMAIN_ESCAPED}_zammad-postgresql
+    restart: always
+    volumes:
+      - ${DOMAIN_PATH}/zammad-backup:/var/tmp/zammad
+      - ${DOMAIN_PATH}/zammad:/opt/zammad
+
+  ${DOMAIN_ESCAPED}_zammad-elasticsearch:
+    container_name: ${DOMAIN_ESCAPED}_zammad-elasticsearch
+    environment:
+      - discovery.type=single-node
+    image: ${IMAGE_REPO}:zammad-elasticsearch${VERSION}
+    restart: always
+    volumes:
+      - ${DOMAIN_PATH}/elasticsearch:/usr/share/elasticsearch/data
+
+  ${DOMAIN_ESCAPED}_zammad-init:
+    container_name: ${DOMAIN_ESCAPED}_zammad-init
+    command: ["zammad-init"]
+    depends_on:
+      - ${DOMAIN_ESCAPED}_zammad-memcached
+      - ${DOMAIN_ESCAPED}_zammad-elasticsearch
+      - ${DOMAIN_ESCAPED}_zammad-postgresql
+    environment:
+      - POSTGRESQL_USER=${POSTGRES_USER}
+      - POSTGRESQL_PASS=${POSTGRES_PASSWORD}
+      - POSTGRESQL_DB_CREATE=false
+      - ELASTICSEARCH_HOST=${DOMAIN_ESCAPED}_zammad-elasticsearch
+      - MEMCACHED_HOST=${DOMAIN_ESCAPED}_zammad-memcached
+      - ZAMMAD_RAILSSERVER_HOST=${DOMAIN_ESCAPED}_zammad-railsserver
+      - ZAMMAD_WEBSOCKET_HOST=${DOMAIN_ESCAPED}_zammad-websocket
+      - POSTGRESQL_HOST=${DOMAIN_ESCAPED}_zammad-postgresql
+    image: ${IMAGE_REPO}:zammad${VERSION}
+    links:
+      - ${DOMAIN_ESCAPED}_zammad-memcached
+      - ${DOMAIN_ESCAPED}_zammad-elasticsearch
+      - ${DOMAIN_ESCAPED}_zammad-postgresql
+    restart: on-failure
+    volumes:
+      - ${DOMAIN_PATH}/zammad:/opt/zammad
+
+  ${DOMAIN_ESCAPED}_zammad-memcached:
+    container_name: ${DOMAIN_ESCAPED}_zammad-memcached
+    command: memcached -m 256M
+    image: memcached:1.5.22-alpine
+    restart: always
+
+  ${DOMAIN_ESCAPED}_zammad-nginx:
+    container_name: ${DOMAIN_ESCAPED}_zammad-nginx
+    command: ["zammad-nginx"]
+    ports:
+      - "${HTTP_PORT}:80"
+    depends_on:
+      - ${DOMAIN_ESCAPED}_zammad-railsserver
+    environment:
+      - ELASTICSEARCH_HOST=${DOMAIN_ESCAPED}_zammad-elasticsearch
+      - MEMCACHED_HOST=${DOMAIN_ESCAPED}_zammad-memcached
+      - ZAMMAD_RAILSSERVER_HOST=${DOMAIN_ESCAPED}_zammad-railsserver
+      - ZAMMAD_WEBSOCKET_HOST=${DOMAIN_ESCAPED}_zammad-websocket
+    image: ${IMAGE_REPO}:zammad${VERSION}
+    links:
+      - ${DOMAIN_ESCAPED}_zammad-railsserver
+      - ${DOMAIN_ESCAPED}_zammad-websocket
+    restart: always
+    volumes:
+      - ${DOMAIN_PATH}/zammad:/opt/zammad
+
+  ${DOMAIN_ESCAPED}_zammad-postgresql:
+    container_name: ${DOMAIN_ESCAPED}_zammad-postgresql
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=zammad_production
+    image: ${IMAGE_REPO}:zammad-postgresql${VERSION}
+    restart: always
+    volumes:
+      - ${DOMAIN_PATH}/postgresql:/var/lib/postgresql/data
+
+  ${DOMAIN_ESCAPED}_zammad-railsserver:
+    container_name: ${DOMAIN_ESCAPED}_zammad-railsserver
+    command: ["zammad-railsserver"]
+    environment:
+      - ELASTICSEARCH_HOST=${DOMAIN_ESCAPED}_zammad-elasticsearch
+      - MEMCACHED_HOST=${DOMAIN_ESCAPED}_zammad-memcached
+      - ZAMMAD_RAILSSERVER_HOST=${DOMAIN_ESCAPED}_zammad-railsserver
+      - ZAMMAD_WEBSOCKET_HOST=${DOMAIN_ESCAPED}_zammad-websocket
+    depends_on:
+      - ${DOMAIN_ESCAPED}_zammad-memcached
+      - ${DOMAIN_ESCAPED}_zammad-postgresql
+    image: ${IMAGE_REPO}:zammad${VERSION}
+    links:
+      - ${DOMAIN_ESCAPED}_zammad-elasticsearch
+      - ${DOMAIN_ESCAPED}_zammad-memcached
+      - ${DOMAIN_ESCAPED}_zammad-postgresql
+    restart: always
+    volumes:
+      - ${DOMAIN_PATH}/zammad:/opt/zammad
+
+  ${DOMAIN_ESCAPED}_zammad-scheduler:
+    container_name: ${DOMAIN_ESCAPED}_zammad-scheduler
+    command: ["zammad-scheduler"]
+    environment:
+      - ELASTICSEARCH_HOST=${DOMAIN_ESCAPED}_zammad-elasticsearch
+      - MEMCACHED_HOST=${DOMAIN_ESCAPED}_zammad-memcached
+      - ZAMMAD_RAILSSERVER_HOST=${DOMAIN_ESCAPED}_zammad-railsserver
+      - ZAMMAD_WEBSOCKET_HOST=${DOMAIN_ESCAPED}_zammad-websocket
+    depends_on:
+      - ${DOMAIN_ESCAPED}_zammad-memcached
+      - ${DOMAIN_ESCAPED}_zammad-railsserver
+    image: ${IMAGE_REPO}:zammad${VERSION}
+    links:
+      - ${DOMAIN_ESCAPED}_zammad-elasticsearch
+      - ${DOMAIN_ESCAPED}_zammad-memcached
+      - ${DOMAIN_ESCAPED}_zammad-postgresql
+    restart: always
+    volumes:
+      - ${DOMAIN_PATH}/zammad:/opt/zammad
+
+  ${DOMAIN_ESCAPED}_zammad-websocket:
+    container_name: ${DOMAIN_ESCAPED}_zammad-websocket
+    command: ["zammad-websocket"]
+    environment:
+      - ELASTICSEARCH_HOST=${DOMAIN_ESCAPED}_zammad-elasticsearch
+      - MEMCACHED_HOST=${DOMAIN_ESCAPED}_zammad-memcached
+      - ZAMMAD_RAILSSERVER_HOST=${DOMAIN_ESCAPED}_zammad-railsserver
+      - ZAMMAD_WEBSOCKET_HOST=${DOMAIN_ESCAPED}_zammad-websocket
+    depends_on:
+      - ${DOMAIN_ESCAPED}_zammad-memcached
+      - ${DOMAIN_ESCAPED}_zammad-railsserver
+    image: ${IMAGE_REPO}:zammad${VERSION}
+    links:
+      - ${DOMAIN_ESCAPED}_zammad-postgresql
+      - ${DOMAIN_ESCAPED}_zammad-memcached
+    restart: always
+    volumes:
+      - ${DOMAIN_PATH}/zammad:/opt/zammad

@@ -5,6 +5,8 @@ from os.path import isfile, join
 
 from Domain import Domain
 from modules.WordPress import WordPress
+from modules.Nextcloud import Nextcloud
+from modules.Zammad import Zammad
 
 
 class ServiceManager:
