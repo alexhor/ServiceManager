@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
-from os import makedirs, remove
-from os.path import exists, isfile, join
+from os import chown, makedirs, remove
+from os.path import exists, isfile, isdir, join
 import secrets
 import string
 from socketserver import TCPServer
@@ -30,6 +30,8 @@ class Module:
             folderPath = join(self.subDomain.rootDir, dirName)
             if not exists(folderPath):
                 makedirs(folderPath)
+                # Set permissions for docker
+                chown(folderPath, 1000, 1000)
         # Tell the subdomain about this module
         self.subDomain.AddModule(self)
         # Get the http port if it exists
@@ -120,4 +122,7 @@ class Module:
         remove(self.envFile)
         # Delete all required dirs
         for dirName in self.requiredDirs:
-            rmtree(join(self.subDomain.rootDir, dirName))
+            dirPath=join(self.subDomain.rootDir, dirName)
+            if isdir(dirPath):
+                rmtree(dirPath)
+
