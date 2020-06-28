@@ -20,13 +20,12 @@ class SubDomain:
     
     Args:
         name (string): The domains name
-        rootDir (string): The main domains directory
     """
-    def __init__(self, name, rootDir, topLevelDomain):
+    def __init__(self, name, topLevelDomain):
         self.name = name
         self.topLevelDomain = topLevelDomain
         # This domains top directory
-        self.rootDir = join(rootDir, self.name)
+        self.rootDir = join(self.topLevelDomain.rootDir, self.name)
         # Make sure the domains directory exists
         if not isdir(self.rootDir):
             makedirs(self.rootDir)

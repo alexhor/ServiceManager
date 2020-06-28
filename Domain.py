@@ -65,7 +65,7 @@ class Domain:
         if name in self.subDomains.keys():
             return self.subDomains[name]
         # Create a new subdomain
-        subDomain = SubDomain(name, self.rootDir, self)
+        subDomain = SubDomain(name, self)
         self.subDomains[subDomain.__str__()] = subDomain
         return subDomain
 

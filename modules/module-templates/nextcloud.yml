@@ -21,7 +21,7 @@ services:
       container_name: ${DOMAIN_ESCAPED}_nextcloud
       depends_on:
         - ${DOMAIN_ESCAPED}_db
-        #- ${DOMAIN_ESCAPED}_redis
+        - ${DOMAIN_ESCAPED}_redis
       environment:
         MYSQL_HOST: ${DOMAIN_ESCAPED}_db:3306
         MYSQL_USER: nextcloud
@@ -31,7 +31,7 @@ services:
         NEXTCLOUD_TRUSTED_DOMAINS: ${DOMAIN}
         NEXTCLOUD_ADMIN_USER: admin
         NEXTCLOUD_ADMIN_PASSWORD: admin
-        #REDIS_HOST: ${DOMAIN_ESCAPED}_redis
+        REDIS_HOST: ${DOMAIN_ESCAPED}_redis
         #REDIS_HOST_PASSWORD: ${REDIS_PASSWORD}
       image: nextcloud:latest
       networks:
