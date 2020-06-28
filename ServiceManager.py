@@ -6,6 +6,7 @@ from os.path import isfile, join
 from Domain import Domain
 from modules.WordPress import WordPress
 
+
 class ServiceManager:
     """A docker-compose interface to manage web services"""
     # The top level directory
@@ -56,12 +57,17 @@ class ServiceManager:
 if __name__ == '__main__':
     if __package__ is None:
         __package__ = "docker-compose"
+    # Init manager
     manager = ServiceManager()
-    domain = manager.domain('h-software.de')
-    blog = domain.subDomain('blog')
-    main = domain.subDomain('h-software.de')
-    domain.delete()
-    blogWp = WordPress(blog)
-    mainWp = WordPress(main)
+    # Create a new top level domain
+    domain = manager.domain('example.com')
+    # Within a top level domain, you can create subdomains
+    # that can each hold one module (e.g. a WordPress instance)
+    blogSubDomain = domain.subDomain('blog')    # This will create the subdomain "blog.example.com"
+    blogWp = WordPress(blogSubDomain)
+    # This starts all containers needed for WordPress and generates ssl certificates
+    # and haproxy bindings. Afterwards the site can be accessed via "blog.example.com"
     blogWp.up()
-    mainWp.up()
+    # To access the top level domain itself ("example.com"),
+    # you have to create a subdomain for it as well
+    mainSubDomain = domain.subDomain('example.com')
