@@ -4,6 +4,40 @@ Manage web services with docker-compose and haproxy
 Warning: This programm is under heavy development and probably not very stable
 
 ## Usage
+Start the command line interface
+```
+python CLI.py
+```
+***
+For a full list of commands check the [Wiki](https://github.com/alexhor/ServiceManager/wiki/CLI-command-reference)
+***
+
+Create a new or select an existing top level domain
+```python
+ServiceManager>select domain example.com
+selected domain "example.com"
+```
+After selecting a domain, get all current subdomains for it
+```python
+ServiceManager>list subdomain
+avaibale subdomains:
+    blog.example.com
+    nextcloud.example.com
+```
+Create a new or select an existing subdomain, add a module to it and bring that module up
+```python
+ServiceManager>create sd blog
+selected subdomain "blog.example.com"
+ServiceManager>create md WordPress
+created module "WordPress"
+ServiceManager>up md
+Creating network "bin_blog-example-com" with the default driver
+Creating blog-example-com_mysql ... done
+Creating blog-example-com_wordpress ... done
+module "WordPress" is coming up
+```
+
+## Usaging the ServiceManager directly
 ```python
 from ServiceManager import ServiceManager
 # Init manager
@@ -25,7 +59,7 @@ blogWp.up()
 # you have to create a subdomain for it as well
 mainSubDomain = domain.subDomain('example.com')
 ```
-A cli will follow in the near future
+
 
 ## Dependencies
   * Docker
