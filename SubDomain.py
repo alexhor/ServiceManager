@@ -5,23 +5,24 @@ from os.path import isfile, isdir, join
 from shutil import rmtree
 from subprocess import call
 
+from modules.ModuleLoader import ModuleLoader
+from modules.NoneModule import NoneModule
+
 class SubDomain:
     """A domain that can host a module"""
     # A list of all default folders
     defaultFolderList = ('httpdocs',)
     # A list of directories to ignore when looking for subdomains
     nonDomainDirs = ('bin', 'tmp')
-    # The currently active module
-    activeModule = None
     # Config file location for haproxy
     _haproxyConfigFile = join('/', 'etc', 'haproxy', 'haproxy.cfg')
 
-    """Make sure every required folder and file for this domain exists
-    
-    Args:
-        name (string): The domains name
-    """
     def __init__(self, name, topLevelDomain):
+        """Make sure every required folder and file for this domain exists
+        
+        Args:
+            name (string): The domains name
+        """
         self.name = name
         self.topLevelDomain = topLevelDomain
         # This domains top directory
@@ -31,7 +32,8 @@ class SubDomain:
             makedirs(self.rootDir)
         # Make sure an ssl certificate for this subdomain exists
         self._setupSsl()
-        # // TODO: load module if one exists
+        # Load currently active module if one exists
+        self.activeModule = ModuleLoader.load(subDomain=self)
 
     def __repr__(self):
         return self.name
@@ -46,13 +48,11 @@ class SubDomain:
         self.deleteModule()
         # Add new module
         self.activeModule = module
-        # // TODO: save module for later
 
     def deleteModule(self):
         """Delete the domains module if exists"""
-        if self.activeModule is not None:
-            self.activeModule.clean()
-        self.activeModule = None
+        self.activeModule.clean()
+        self.activeModule = NoneModule()
 
     def delete(self):
         """Delete this subdomain"""
@@ -66,7 +66,7 @@ class SubDomain:
             delete (bool): Delete or add the given rule
         """
         # Adding rules is only allowed with a valid module
-        if not delete and self.activeModule is None:
+        if not delete and self.activeModule.isNone():
             return
         outputBuffer = ''
         aclName = self.name.replace('.', '-')

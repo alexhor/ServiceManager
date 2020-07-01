@@ -18,7 +18,7 @@ class WordPress(Webserver, MySql, Module):
             subDomain (SubDomain): The subdomain this module is installed on
         """
         self.requiredDirs = ['mysql', 'wordpress']
-        super().__init__(subDomain, 'wordpress')
+        super().__init__(subDomain)
 
     def _createEnvFile(self):
         """Put all requried parameters into an .env file in the subdomains root directory"""

@@ -5,8 +5,6 @@ from os.path import isfile, isdir
 from subprocess import run
 from distutils.dir_util import copy_tree
 
-from .Module import Module
-
 
 class Webserver:
     def copyData(self, dataDir, webDir='httpdocs'):

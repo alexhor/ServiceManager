@@ -12,7 +12,7 @@ class Zammad(Webserver, Module):
             subDomain (SubDomain): The subdomain this module is installed on
         """
         self.requiredDirs = ['zammad', 'zammad-backup', 'elasticsearch', 'postgresql']
-        super().__init__(subDomain, 'zammad')
+        super().__init__(subDomain)
 
     def _createEnvFile(self):
         """Put all requried parameters into an .env file in the subdomains root directory"""

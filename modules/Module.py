@@ -8,20 +8,20 @@ from socketserver import TCPServer
 from shutil import copy, rmtree
 from subprocess import call
 
+
 class Module:
     # A temporary config file location
     tmpConfigFile = 'docker-compose.yml'
     # The local port exposed by a http server
     exposedPort = None
 
-    def __init__(self, subDomain, moduleName):
+    def __init__(self, subDomain):
         """An abstract base module
         
         Args:
             subDomain (SubDomain): The subdomain this module is installed on
-            moduleName (string): Name of this module
         """
-        self.name = moduleName
+        self.name = type(self).__name__
         self.subDomain = subDomain
         self.envFile = join(self.subDomain.rootDir, '.env')
         self.moduleTemplate = join('modules', 'module-templates', self.name + '.yml')
@@ -32,14 +32,16 @@ class Module:
                 makedirs(folderPath)
                 # Set permissions for docker
                 chown(folderPath, 1000, 1000)
-        # Tell the subdomain about this module
-        self.subDomain.AddModule(self)
         # Get the http port if it exists
         self.envFileDict = self.envFileToDict()
         if 'HTTP_PORT' in self.envFileDict.keys():
             self.exposedPort = self.envFileDict['HTTP_PORT']
 
-    def password(self, length = 255):
+    def __repr__(self):
+        return type(self).__name__
+
+    @staticmethod
+    def password(length = 255):
         """Generate a secure password
         
         Args:
@@ -51,7 +53,8 @@ class Module:
         alphabet = string.ascii_letters + string.digits
         return ''.join(secrets.choice(alphabet) for i in range(length))
 
-    def getFreePort(self):
+    @staticmethod
+    def getFreePort():
         """Get a port available for binding
         
         Returns:
@@ -71,11 +74,22 @@ class Module:
         Returns:
             dict: The converted env file
         """
-        if not isfile(self.envFile):
+        return self.fileToDict(self.envFile)
+
+    @staticmethod
+    def fileToDict(filePath):
+        """Get a dictionary representation of a file
+        
+        Args:
+            filePath (string): Path to the file to convert
+        Returns:
+            dict: The converted file
+        """
+        if not isfile(filePath):
             return dict()
         envVars = dict()
-        with open(self.envFile, 'r') as envFile:
-            for line in envFile:
+        with open(filePath, 'r') as file:
+            for line in file:
                 splitLine = line.strip().split('=', 1)
                 # Skip invalid lines
                 if len(splitLine) != 2:
@@ -107,6 +121,7 @@ class Module:
         call(['docker-compose', '-f', self.tmpConfigFile, 'up', '-d'])
         # Configure haproxy
         self.subDomain.haproxyConfig()
+        self.save()
 
     def down(self):
         """Stop all running containers"""
@@ -114,6 +129,7 @@ class Module:
         call(['docker-compose', '-f', self.tmpConfigFile, 'down'])
         # Configure haproxy
         self.subDomain.haproxyConfig(True)
+        self.save()
 
     def clean(self):
         """Delete all existing data"""
@@ -125,4 +141,25 @@ class Module:
             dirPath=join(self.subDomain.rootDir, dirName)
             if isdir(dirPath):
                 rmtree(dirPath)
+        self.save(True)
 
+    def isNone(self):
+        """States wether this is a proper module or not
+        
+        Returns:
+            bool: Wether this is a proper module or not
+        """
+        return False
+
+    def save(self, delete=False):
+        """Save this module to the current subdomain
+        
+        Args:
+            delete (bool): Wether the current module should be deleted"""
+        moduleFile = join(self.subDomain.rootDir, '.module')
+        if delete:
+            if isfile(moduleFile):
+                remove(moduleFile)
+        else:
+            with open(moduleFile, 'w') as file:
+                file.write('MODULE_NAME=' + self.name + '\n')
