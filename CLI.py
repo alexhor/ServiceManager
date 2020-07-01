@@ -82,7 +82,7 @@ class CLI:
 
     def __processDomainCommands(self, command):
         """Process Domain related commands
-        usage: [select|exit|create|delete|get|list|ls|current] [dm|domain] [DOMAIN]
+        usage: [select|create|exit|delete|get|list|ls|current] [dm|domain] [DOMAIN]
         
         Args:
             command (string): The command input by the user
@@ -140,7 +140,7 @@ class CLI:
 
     def __processSubDomainCommands(self, command):
         """Process SubDomain related commands
-        usage: [select|exit|create|delete|get|list|ls|current] [sd|subdomain] [SUBDOMAIN]
+        usage: [select|create|exit|delete|get|list|ls|current] [sd|subdomain] [SUBDOMAIN]
         
         Args:
             command (string): The command input by the user
@@ -229,9 +229,9 @@ class CLI:
             return CommandReturnCode.Success
         # Delete a module from the current subdomain
         elif commandName == 'delete' or commandName == 'rm' or commandName == 'clean':
-            moduleName = str(self._currentDomain.activeModule)
-            self._currentsubDomain.deleteModule()
-            print('deleted module "' + moduleName + '" from subdomain "' + str(self._currentDomain) + '"')
+            moduleName = str(self._currentSubDomain.activeModule)
+            self._currentSubDomain.deleteModule()
+            print('deleted module "' + moduleName + '" from subdomain "' + str(self._currentSubDomain) + '"')
             return CommandReturnCode.Success
         # Bring all containers of this module up
         elif commandName == 'up':

@@ -4,8 +4,8 @@ from .Module import Module
 
 
 class NoneModule(Module):
-    def __init__(self, subDomain):
-        """A WordPress installation
+    def __init__(self, subDomain=None):
+        """A dummy module
         
         Args:
             subDomain (SubDomain): The subdomain this module is installed on

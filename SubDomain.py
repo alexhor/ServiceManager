@@ -38,7 +38,7 @@ class SubDomain:
     def __repr__(self):
         return self.name
 
-    def AddModule(self, module):
+    def addModule(self, module):
         """Add a module to this domain
         
         Args:
