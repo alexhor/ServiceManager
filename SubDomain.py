@@ -152,8 +152,8 @@ class SubDomain:
         Args:
             forceRenewal (bool): If the renewal should be forced
         """
-        certFolder = join('/', 'etc', 'ssl', self.topLevelDomain.name)
-        self._sslCertificateFile = join(certFolder, self.name + '.pem')
+        certFolder = join('/', 'etc', 'ssl')
+        self._sslCertificateFile = join(certFolder, self.name + '/cert.pem')
         if isfile(self._sslCertificateFile):
             # Nothing to do here if the certificate already exists and renewal is not forced
             if not forceRenewal:
