@@ -7,6 +7,7 @@ from subprocess import call
 
 from modules.ModuleLoader import ModuleLoader
 from modules.NoneModule import NoneModule
+import config
 
 class SubDomain:
     """A domain that can host a module"""
@@ -65,6 +66,8 @@ class SubDomain:
         Args:
             delete (bool): Delete or add the given rule
         """
+        if config.Proxy.haproxy != config.used_proxy:
+            return
         # Adding rules is only allowed with a valid module
         if not delete and self.activeModule.isNone():
             return
@@ -152,6 +155,8 @@ class SubDomain:
         Args:
             forceRenewal (bool): If the renewal should be forced
         """
+        if not config.handle_ssl_certificates:
+            return
         certFolder = join('/', 'etc', 'ssl')
         self._sslCertificateFile = join(certFolder, self.name + '/cert.pem')
         if isfile(self._sslCertificateFile):

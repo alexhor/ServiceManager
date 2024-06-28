@@ -8,6 +8,8 @@ from socketserver import TCPServer
 from shutil import copy, rmtree
 from subprocess import call
 
+import config
+
 
 class Module:
     # A temporary config file location
@@ -118,7 +120,7 @@ class Module:
         """Bring up this modules containers"""
         self._prepareTemplateFile()
         # Bring up containers
-        call(['docker-compose', '-f', self.tmpConfigFile, 'up', '-d'])
+        call(config.docker_compose_command + ['-f', self.tmpConfigFile, 'up', '-d'])
         # Configure haproxy
         self.subDomain.haproxyConfig()
         self.save()
@@ -126,7 +128,7 @@ class Module:
     def down(self):
         """Stop all running containers"""
         self._prepareTemplateFile()
-        call(['docker-compose', '-f', self.tmpConfigFile, 'down'])
+        call(config.docker_compose_command + ['-f', self.tmpConfigFile, 'down'])
         # Configure haproxy
         self.subDomain.haproxyConfig(True)
         self.save()
@@ -134,7 +136,7 @@ class Module:
     def clean(self):
         """Delete all existing data"""
         self.down()
-        call(['docker-compose', '-f', self.tmpConfigFile, 'rm'])
+        call(config.docker_compose_command + ['-f', self.tmpConfigFile, 'rm'])
         remove(self.envFile)
         # Delete all required dirs
         for dirName in self.requiredDirs:
