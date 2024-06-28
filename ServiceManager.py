@@ -7,12 +7,13 @@ from Domain import Domain
 from modules.WordPress import WordPress
 from modules.Nextcloud import Nextcloud
 from modules.Zammad import Zammad
+import config
 
 
 class ServiceManager:
     """A docker-compose interface to manage web services"""
     # The top level directory
-    rootDir = join('/', 'var', 'www', 'services')
+    rootDir = config.root_dir
     # A list of directories to ignore when looking for domains
     nonDomainDirs = ('bin', 'tmp')
     # All available top level domains
