@@ -87,7 +87,6 @@ services:
     labels:
       - traefik.enable=true
       - traefik.http.routers.${DOMAIN_ESCAPED}.rule=Host(`${DOMAIN}`)
-      - traefik.http.routers.${DOMAIN_ESCAPED}.entrypoints=websecure
       - traefik.http.routers.${DOMAIN_ESCAPED}.tls.certresolver=LetsEncrypt
 
   ${DOMAIN_ESCAPED}_zammad-postgresql:

@@ -27,17 +27,15 @@ services:
     networks:
       - ${DOMAIN_ESCAPED}
       - proxy
-    ports:
-      - "${HTTP_PORT}:80"
     restart: always
     volumes:
       - ${DOMAIN_PATH}/wordpress:/var/www/html
     labels:
       - traefik.enable=true
       - traefik.http.routers.${DOMAIN_ESCAPED}.rule=Host(`${DOMAIN}`)
-      - traefik.http.routers.${DOMAIN_ESCAPED}.entrypoints=websecure
       - traefik.http.routers.${DOMAIN_ESCAPED}.tls.certresolver=LetsEncrypt
 networks:
   ${DOMAIN_ESCAPED}:
   proxy:
     name: proxy
+    external: true
