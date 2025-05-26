@@ -68,8 +68,6 @@ services:
   ${DOMAIN_ESCAPED}_zammad-nginx:
     container_name: ${DOMAIN_ESCAPED}_zammad-nginx
     command: ["zammad-nginx"]
-    ports:
-      - "${HTTP_PORT}:80"
     depends_on:
       - ${DOMAIN_ESCAPED}_zammad-railsserver
     environment:

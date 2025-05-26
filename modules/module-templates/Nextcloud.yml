@@ -36,8 +36,6 @@ services:
     image: nextcloud:latest
     networks:
       - ${DOMAIN_ESCAPED}
-    ports:
-      - "${HTTP_PORT}:80"
     restart: always
     volumes:
       - ${DOMAIN_PATH}/nextcloud:/var/www/html
