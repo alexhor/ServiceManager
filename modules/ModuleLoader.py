@@ -3,12 +3,14 @@
 from os.path import isfile, join
 
 from .NoneModule import NoneModule
+from .Webserver import Webserver
 from .WordPress import WordPress
 from .Nextcloud import Nextcloud
 from .Zammad import Zammad
 
 class ModuleLoader:
     __availableModules = {
+        'Webserver' :   Webserver,
         'WordPress' :   WordPress,
         'Nextcloud' :   Nextcloud,
         'Zammad'    :   Zammad,
