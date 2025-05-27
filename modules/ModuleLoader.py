@@ -10,6 +10,7 @@ from .Zammad import Zammad
 from .Odoo import Odoo
 from .UptimeKuma import UptimeKuma
 from .FreeScout import FreeScout
+from .Mumble import Mumble
 
 class ModuleLoader:
     __availableModules = {
@@ -20,6 +21,7 @@ class ModuleLoader:
         'Odoo'      :   Odoo,
         'UptimeKuma':   UptimeKuma,
         'FreeScout':   FreeScout,
+        'Mumble':   Mumble,
     }
 
     @staticmethod
