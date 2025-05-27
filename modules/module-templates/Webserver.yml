@@ -2,9 +2,8 @@
 services:
   ${DOMAIN_ESCAPED}_php:
     container_name: ${DOMAIN_ESCAPED}_php
-    image: sohmc/php-mysqli:8-apache
+    image: php:8.2-apache
     networks:
-      - ${DOMAIN_ESCAPED}
       - proxy
     restart: always
     volumes:
@@ -16,7 +15,6 @@ services:
       - traefik.http.routers.${DOMAIN_ESCAPED}.tls.certresolver=LetsEncrypt
 
 networks:
-  ${DOMAIN_ESCAPED}:
   proxy:
     name: proxy
     external: true
