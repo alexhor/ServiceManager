@@ -7,6 +7,7 @@ from .Webserver import Webserver
 from .WordPress import WordPress
 from .Nextcloud import Nextcloud
 from .Zammad import Zammad
+from .UptimeKuma import UptimeKuma
 
 class ModuleLoader:
     __availableModules = {
@@ -14,6 +15,7 @@ class ModuleLoader:
         'WordPress' :   WordPress,
         'Nextcloud' :   Nextcloud,
         'Zammad'    :   Zammad,
+        'UptimeKuma':   UptimeKuma,
     }
 
     @staticmethod
