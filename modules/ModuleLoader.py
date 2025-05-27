@@ -7,6 +7,7 @@ from .Webserver import Webserver
 from .WordPress import WordPress
 from .Nextcloud import Nextcloud
 from .Zammad import Zammad
+from .Odoo import Odoo
 from .UptimeKuma import UptimeKuma
 
 class ModuleLoader:
@@ -15,6 +16,7 @@ class ModuleLoader:
         'WordPress' :   WordPress,
         'Nextcloud' :   Nextcloud,
         'Zammad'    :   Zammad,
+        'Odoo'      :   Odoo,
         'UptimeKuma':   UptimeKuma,
     }
 

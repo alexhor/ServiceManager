@@ -1,0 +1,52 @@
+# docker-compose file for an Odoo installation
+services:
+  ${DOMAIN_ESCAPED}_db:
+    container_name: ${DOMAIN_ESCAPED}_postgres
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: odoo
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    image: postgres:15
+    user: root
+    networks:
+      - ${DOMAIN_ESCAPED}
+    restart: always
+    volumes:
+      - ${DOMAIN_PATH}/postgresql:/var/lib/postgresql/data
+
+  ${DOMAIN_ESCAPED}_odoo:
+    container_name: ${DOMAIN_ESCAPED}_odoo
+    depends_on:
+      - ${DOMAIN_ESCAPED}_db
+    environment:
+      HOST: ${DOMAIN_ESCAPED}_db
+      USER: odoo
+      PASSWORD: ${POSTGRES_PASSWORD}
+    image: odoo:17
+    user: root
+    networks:
+      - ${DOMAIN_ESCAPED}
+      - proxy
+    #ports:
+    #  - "${LIVECHAT_PORT}:8072"
+    tty: true
+    command: --
+    restart: always
+    volumes:
+      #- /etc/timezone:/etc/timezone:ro
+      #- /etc/localtime:/etc/localtime:ro
+      # - ${DOMAIN_PATH}/odoo/entrypoint.sh:/entrypoint.sh   # if you want to install additional Python packages, uncomment this line!
+      - ${DOMAIN_PATH}/odoo/addons:/mnt/extra-addons
+      - ${DOMAIN_PATH}/odoo/etc:/etc/odoo
+      - ${DOMAIN_PATH}/odoo/lib:/var/lib/odoo
+    labels:
+      - traefik.enable=true
+      - traefik.http.services.${DOMAIN_ESCAPED}.loadbalancer.server.port=8069
+      - traefik.http.routers.${DOMAIN_ESCAPED}.rule=Host(`${DOMAIN}`)
+      - traefik.http.routers.${DOMAIN_ESCAPED}.tls.certresolver=LetsEncrypt
+
+networks:
+  ${DOMAIN_ESCAPED}:
+  proxy:
+    name: proxy
+    external: true
