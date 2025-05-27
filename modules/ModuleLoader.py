@@ -9,6 +9,7 @@ from .Nextcloud import Nextcloud
 from .Zammad import Zammad
 from .Odoo import Odoo
 from .UptimeKuma import UptimeKuma
+from .FreeScout import FreeScout
 
 class ModuleLoader:
     __availableModules = {
@@ -18,6 +19,7 @@ class ModuleLoader:
         'Zammad'    :   Zammad,
         'Odoo'      :   Odoo,
         'UptimeKuma':   UptimeKuma,
+        'FreeScout':   FreeScout,
     }
 
     @staticmethod
