@@ -16,7 +16,7 @@ class Webserver(MySql, Module):
         Args:
             subDomain (SubDomain): The subdomain this module is installed on
         """
-        self.requiredDirs = ['mysql', 'php']
+        self.requiredDirs = ['php']
         super().__init__(subDomain)
 
     def _createEnvFile(self):
@@ -25,10 +25,6 @@ class Webserver(MySql, Module):
         with open(self.envFile, 'w') as envFile:
             envFile.write('DOMAIN=' + str(self.subDomain) + '\n')
             envFile.write('DOMAIN_ESCAPED=' + str(self.subDomain).replace('.', '-') + '\n')
-            envFile.write('HTTP_PORT=' + str(self.exposedPort) + '\n')
-            envFile.write('DOMAIN_PATH=' + self.subDomain.rootDir + '\n')
-            envFile.write('MYSQL_PASSWORD=' + self.password() + '\n')
-            envFile.write('MYSQL_ROOT_PASSWORD=' + self.password() + '\n')
 
     def copyData(self, dataDir, webDir='httpdocs'):
         """Import a web directory
