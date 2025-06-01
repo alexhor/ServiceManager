@@ -1,128 +1,94 @@
 #!/usr/bin/python3
 
-from ast import literal_eval
-from typing import Any, Type
+from abc import ABC, abstractmethod
+from typing import Any
+from typing import Generator
+from prompt_toolkit.completion import Completion
+
+from ServiceManager import ServiceManager
+from modules.ModuleLoader import ModuleLoader
 
 
 class Command:
-    _argList: list
-    _commandString: str
+    def __init__(self, command: str, aliasList: list[str]=[], subcommandList: list['Command']=[], argList: list['Argument']=[]):
+        self._command: str = command
+        self.__aliasList: list[str] = aliasList
+        self._subcommandList: list[Command] = subcommandList
+        self._argList: list[Argument] = argList
 
-    def __init__(self, command: str):
-        self._commandString = command
-        self._readCommand()
+    # Command
+    @property
+    def command(self) -> str:
+        return self._command
 
-    def _readCommand(self) -> None:
-        # reset argument list
-        self._argList = []
+    # Alias
+    @property
+    def aliasList(self) -> tuple[str]:
+        return tuple(self.__aliasList)
 
-        isEscaped = False
-        isQuoted = False
-        doubleQuotes = False
-        currentArg = ''
-        # process argument
-        for char in self._commandString:
-            # this character wasn't escaped, so handle special cases
-            if not isEscaped:
-                # handle double quotes
-                if char == '"':
-                    # a quoting is active
-                    if isQuoted:
-                        # end quoting
-                        if doubleQuotes:
-                            isQuoted = False
-                            continue
-                    # start a new quoting
-                    else:
-                        isQuoted = True
-                        doubleQuotes = True
-                        continue
-                # single quoted argument
-                elif char == "'":
-                    # a quoting is active
-                    if isQuoted:
-                        # end quoting
-                        if not doubleQuotes:
-                            isQuoted = False
-                            continue
-                    # start a new quoting
-                    else:
-                        isQuoted = True
-                        doubleQuotes = False
-                        continue
-                # space character
-                elif char == ' ' or char == '\t':
-                    # this space only marks a new argument if not quoted
-                    if not isQuoted:
-                        # add command if it exists
-                        if currentArg != '':
-                            self._argList.append(currentArg)
-                        currentArg = ''
-                        continue
-                # escape character
-                elif char == '\\':
-                    isEscaped = True
-                    continue
-            # the next character isn't escaped anymore
-            else:
-                isEscaped = False
-            # this is a normal argument character
-            currentArg += char
-        # put last argument in, if one exists
-        if currentArg != '':
-            self._argList.append(currentArg)
-            currentArg = ''
+    def addAlias(self, alias: str):
+        if alias in self.__aliasList:
+            return
+        self.__aliasList.append(alias)
 
-    def __repr__(self) -> str:
-        return self._argList.__str__()
+    # Subcommand
+    @property
+    def subcommandList(self) -> tuple['Command']:
+        return tuple(self._subcommandList)
 
-    def __len__(self) -> int:
-        return len(self._argList)
+    def addSubcommand(self, subcommand: 'Command'):
+        if subcommand in self._subcommandList:
+            return
+        self._subcommandList.append(subcommand)
 
-    def __iter__(self) -> list:
-        return self._argList
+    # Argument
+    @property
+    def argumentList(self) -> tuple['Argument']:
+        return tuple(self._argList)
 
-    def __getitem__(self, item: int) -> str:
-        return self._argList[item]
+    def addArgument(self, argument: 'Argument'):
+        if argument in self._argList:
+            return
+        self._argList.append(argument)
+    
 
-    def getParameterValues(self, parameterList: list, allowMulti: bool = False) -> list or str:
-        """
-        Fetch the value(s) for the given parameter
-        @type parameterList: list
-        @param parameterList: List of names of parameters to fetch
-        @type allowMulti: bool
-        @param allowMulti: Fetch all matches
-        @rtype: list or str
-        @return: Fetched value(s)
-        """
-        indexList = []
-        for i, j in enumerate(self._argList):
-            if j in parameterList:
-                indexList.append(i)
 
-        # get corresponding values
-        valueList = []
-        for index in indexList:
-            if len(self._argList) > index + 1:
-                valueList.append(self._argList[index + 1])
-                if not allowMulti:
-                    break
-        # single value
-        if not allowMulti:
-            if len(valueList) == 0:
-                return ''
-            else:
-                return valueList[0]
-        # multiple values allowed
-        return valueList
 
-    def __eq__(self, other: Any) -> bool:
-        # compare to string
-        if isinstance(other, str):
-            return self._commandString == other
-        # compare to other command
-        elif isinstance(other, Command):
-            return self._argList == other._argList
-        # last resort
+
+class Argument(ABC):
+    @abstractmethod
+    def yieldCompletion(self, firstLevelText: str) -> Generator[Completion, None, None]:
+        pass
+
+class ArgumentDomain(Argument):
+    def __init__(self, serviceManager):
+        self._serviceManager: ServiceManager = serviceManager
+
+    def yieldCompletion(self, text: str) -> Generator[Completion, None, None]:
+        for domain in self._serviceManager.domains.values():
+            if domain.name.startswith(text):
+                yield Completion(domain.name, start_position=-1*len(text))
+
+class ArgumentSubDomain(Argument):
+    def __init__(self, serviceManager):
+        self._serviceManager: ServiceManager = serviceManager
+
+    def yieldCompletion(self, text: str) -> Generator[Completion, None, None]:
+        if None is self._serviceManager.currentDomain:
+            yield Completion(" ", start_position=-1, display="No top level domain selected")
         else:
-            return self._commandString == other
+            for subdomain in self._serviceManager.currentDomain.loadSubDomains().values():
+                if subdomain.subName.startswith(text):
+                    yield Completion(subdomain.subName, start_position=-1*len(text), display=subdomain.name)
+
+class ArgumentModule(ArgumentDomain):
+    def __init__(self, serviceManager):
+        self._serviceManager: ServiceManager = serviceManager
+
+    def yieldCompletion(self, text: str) -> Generator[Completion, None, None]:
+        if None is self._serviceManager.currentSubDomain:
+            yield Completion(" ", start_position=-1, display="No subdomain selected")
+        else:
+            for module in ModuleLoader.availableModules:
+                if module.startswith(text):
+                    yield Completion(module, start_position=-1*len(text))

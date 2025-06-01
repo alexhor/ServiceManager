@@ -3,6 +3,7 @@
 from os.path import isfile, join
 
 from .NoneModule import NoneModule
+from .Module import Module
 from .Webserver import Webserver
 from .WordPress import WordPress
 from .Nextcloud import Nextcloud
@@ -13,7 +14,7 @@ from .FreeScout import FreeScout
 from .Mumble import Mumble
 
 class ModuleLoader:
-    __availableModules = {
+    availableModules = {
         'Webserver' :   Webserver,
         'WordPress' :   WordPress,
         'Nextcloud' :   Nextcloud,
@@ -54,11 +55,11 @@ class ModuleLoader:
         """
         moduleSettings = ModuleLoader.fileToDict(join(subDomain.rootDir, '.module'))
         # If the module doesn't exist, return a dummy one
-        if 'MODULE_NAME' not in moduleSettings.keys() or moduleSettings['MODULE_NAME'] not in ModuleLoader.__availableModules.keys():
+        if 'MODULE_NAME' not in moduleSettings.keys() or moduleSettings['MODULE_NAME'] not in ModuleLoader.availableModules.keys():
             return NoneModule(subDomain)
         # Otherwise load the module
         else:
-            return ModuleLoader.__availableModules[moduleSettings['MODULE_NAME']](subDomain)
+            return ModuleLoader.availableModules[moduleSettings['MODULE_NAME']](subDomain)
 
     @staticmethod
     def new(moduleName, subDomain):
@@ -72,8 +73,8 @@ class ModuleLoader:
             Module: The created module
         """
         # If the module doesn't exist, return a dummy one
-        if moduleName not in ModuleLoader.__availableModules.keys():
+        if moduleName not in ModuleLoader.availableModules.keys():
             return NoneModule(subDomain)
         # Otherwise create the module
         else:
-            return ModuleLoader.__availableModules[moduleName](subDomain)
+            return ModuleLoader.availableModules[moduleName](subDomain)

@@ -1,13 +1,11 @@
 #!/usr/bin/python3
 
-import re, os
-from os.path import isdir
 from enum import Enum
+from prompt_toolkit import PromptSession
 
+from CliCompleter import CliCompleter
 from ServiceManager import ServiceManager
-from Command import Command
 from modules.ModuleLoader import ModuleLoader
-
 
 class CommandReturnCode(Enum):
     Unknown = 0
@@ -17,7 +15,7 @@ class CommandReturnCode(Enum):
     Exit = 4
 
 
-class ConsoleMod:
+class ConsoleMod(Enum):
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
     OKGREEN = '\033[92m'
@@ -30,239 +28,183 @@ class ConsoleMod:
 
 class CLI:
     """A command line service manager"""
-    _currentSubDomain = None
-    _currentDomain = None
-    _currentSubDomain = None
-    _serviceManager = ServiceManager()
 
     def __init__(self):
-        """Start the interactive cluster editor"""
-        # Start the interactive shell
+        """Start the interactive service manager"""
+        self._service_manager = ServiceManager()
+
+        self._session = PromptSession(completer=CliCompleter(self._service_manager))
+        self.run()
+
+    def run(self):
+        """Run prompt session"""
         while True:
-            commandReturn = self._getCommand()
-            # Check if the shell should be terminated
-            if commandReturn == CommandReturnCode.Exit:
+            try:
+                user_input = self._session.prompt("ServiceManager> ")
+                if user_input.strip() in ["exit", "quit"]:
+                    break
+                self.process_command(user_input.strip())
+            except KeyboardInterrupt:
+                continue
+            except EOFError:
                 break
 
-    def _getCommand(self):
-        """Prompt the user to input another command and run it
-        
-        Returns:
-            CommandReturnCode: The run commands return code
-        """
-        commandString = input(ConsoleMod.HEADER + 'ServiceManager>' + ConsoleMod.ENDC)
-        command = Command(commandString)
-
-        # No command was specified
-        if len(command) == 0:
-            return CommandReturnCode.Unknown
-
-        # Exit the shell
-        if command == 'exit':
-            return CommandReturnCode.Exit
+    def process_command(self, command: str):
+        commandParts = command.strip().split(' ')
 
         # Domain commands
-        commandReturnCode = self.__processDomainCommands(command)
-        if commandReturnCode != CommandReturnCode.Unknown:
-            return commandReturnCode
-
-        # SubDomain commands
-        commandReturnCode = self.__processSubDomainCommands(command)
-        if commandReturnCode != CommandReturnCode.Unknown:
-            return commandReturnCode
-
+        if 'domain' == commandParts[0] or 'dm' == commandParts[0]:
+            if 2 > len(commandParts):
+                pass
+            elif 'exit' == commandParts[1]:
+                self._service_manager.currentDomain = None
+                self._service_manager.currentSubDomain = None
+                print("Domain unselected")
+                return
+            elif 'get' == commandParts[1] or 'current' == commandParts[1]:
+                if None is self._service_manager.currentDomain:
+                    print("No domain selected")
+                else:
+                    print(self._service_manager.currentDomain.name)
+                return
+            elif 'list' == commandParts[1] or 'ls' == commandParts[1]:
+                if 0 == len(self._service_manager.domains):
+                    print("No domains exist")
+                else:
+                    print("Existing domains:")
+                    for domain in self._service_manager.domains:
+                        print(" ", domain)
+                return
+            elif 'select' == commandParts[1] or 'create' == commandParts[1]:
+                if 3 == len(commandParts):
+                    self._service_manager.currentDomain = self._service_manager.domain(commandParts[2])
+                    self._service_manager.currentSubDomain = None
+                    print("Domain", commandParts[2], "selected")
+                    return
+            elif 'delete' == commandParts[1]:
+                if 3 == len(commandParts):
+                    self._service_manager.deleteDomain(commandParts[2])
+                    self._service_manager.currentDomain = None
+                    self._service_manager.currentSubDomain = None
+                    print("Domain", commandParts[2], "delted")
+                    return
+            else:
+                print("Usage:\tdomain COMMAND [DOMAIN]")
+                print("\tdm COMMAND [DOMAIN]")
+                print()
+                print("Available Commands:")
+                print(" ", "get (current)\tGet the currently selected domain")
+                print(" ", "list (ls)\tList all existing top level domains")
+                print(" ", "select\tSelect a top level domain\n\t\tCreates the domain if it doesn't exist yet")
+                print(" ", "create\tCreate a new top level domain\n\t\tOnly selects the domain if it already exists")
+                print(" ", "delete\tDelete an existing top level domain")
+                print(" ", "exit\t\tUnselect the currently selected top level domain")
+                print(" ", "help\t\tDisplay this help")
+                return
+        # Subdomain commands
+        elif 'subdomain' == commandParts[0] or 'sd' == commandParts[0]:
+            if None is self._service_manager.currentDomain:
+                print("No domain selected")
+                return
+            elif 2 > len(commandParts):
+                pass
+            elif 'exit' == commandParts[1]:
+                self._service_manager.currentSubDomain = None
+                print("Subdomain unselected")
+                return
+            elif 'get' == commandParts[1] or 'current' == commandParts[1]:
+                if None is self._service_manager.currentSubDomain:
+                    print("No subdomain selected")
+                else:
+                    print(self._service_manager.currentSubDomain.name)
+                return
+            elif 'list' == commandParts[1] or 'ls' == commandParts[1]:
+                if 0 == len(self._service_manager.currentDomain.loadSubDomains()):
+                    print("No subdomains exist")
+                else:
+                    print("Existing subdomains:")
+                    for subdomain in self._service_manager.currentDomain.subDomains:
+                        print(" ", subdomain)
+                return
+            elif 'select' == commandParts[1] or 'create' == commandParts[1]:
+                if 3 == len(commandParts):
+                    subDomainName: str = commandParts[2]
+                    if subDomainName != self._service_manager.currentDomain.name:
+                        subDomainName = subDomainName[:-1 * len(self._service_manager.currentDomain.name) - 1]
+                    self._service_manager.currentSubDomain = self._service_manager.currentDomain.subDomain(subDomainName)
+                    print("Subdomain", commandParts[2], "selected")
+                    return
+            elif 'delete' == commandParts[1]:
+                if 3 == len(commandParts):
+                    self._service_manager.currentDomain.deleteSubDomain(commandParts[2])
+                    self._service_manager.currentSubDomain = None
+                    print("Subdomain", commandParts[2], "delted")
+                    return
+            else:
+                print("Usage:\tsubdomain COMMAND [SUBDOMAIN]")
+                print("\tsd COMMAND [SUBDOMAIN]")
+                print()
+                print("Available Commands:")
+                print(" ", "get (current)\tGet the currently selected subdomain")
+                print(" ", "list (ls)\tList all existing subdomains under the currently selected top level domain")
+                print(" ", "select\tSelect a subdomain under the currently selected top level domain\n\t\tCreates the subdomain if it doesn't exist yet")
+                print(" ", "create\tCreate a new subdomain under the currently selected top level domain\n\t\tOnly selects the subdomain if it already exists")
+                print(" ", "delete\tDelete an existing subdomain under the currently selected top level domain")
+                print(" ", "exit\t\tUnselect the currently selected subdomain")
+                print(" ", "help\t\tDisplay this help")
+                return
         # Module commands
-        commandReturnCode = self.__processModuleCommands(command)
-        if commandReturnCode != CommandReturnCode.Unknown:
-            return commandReturnCode
-
-        # The command couldn't be processed
-        print(ConsoleMod.WARNING + 'command "' + commandString + '" couldn\'t be processed' + ConsoleMod.ENDC)
-        return CommandReturnCode.Unknown
-
-    def __processDomainCommands(self, command):
-        """Process Domain related commands
-        usage: [select|create|exit|delete|get|list|ls|current] [dm|domain] [DOMAIN]
-        
-        Args:
-            command (string): The command input by the user
-        
-        Returns: The processed commands return code
-        """
-        # Make sure this is a domain command
-        if len(command) not in range(2, 4) or (command[1] != 'dm' and command[1] != 'domain'):
-            return CommandReturnCode.Unknown
-        # Set variables
-        commandName = command[0]
-        domainName = command[2] if len(command) == 3 else ''
-
-        # Select (and create if it doesn't exist) a domain
-        if commandName == 'select' and domainName != '':
-            # Tell user about possibly leaving a previous domain
-            if self._currentDomain is not None:
-                print('left domain "' + str(self._currentDomain))
-            # Get the domain from the manager
-            self._currentDomain = self._serviceManager.domain(domainName)
-            print('selected domain "' + str(self._currentDomain) + '"')
-            return CommandReturnCode.Success
-        # Exit the current domain
-        elif commandName == 'exit':
-            print('left domain "' + str(self._currentDomain))
-            self._currentDomain = None
-            return CommandReturnCode.Success
-        # Create a new domain
-        elif commandName == 'create' and domainName != '':
-            domain = self._serviceManager.domain(domainName)
-            print('created domain "' + str(domain) + '"')
-            return CommandReturnCode.Success
-        # Delete a domain
-        elif commandName == 'delete' and domainName != '':
-            # Get the domain
-            domain = self._serviceManager.domain(domainName)
-            domainName = str(domain)
-            # Now delete it
-            self._serviceManager.deleteDomain(domain)
-            print('deleted domain "' + domainName + '"')
-            return CommandReturnCode.Success
-        # Show the name of the currently selected domain
-        elif commandName == 'current':
-            print('current domain "' + str(self._currentDomain) + '"')
-            return CommandReturnCode.Success
-        # TODO: add a command to show a domains details
-        # List all existing domains
-        elif commandName == 'get' or commandName == 'list' or commandName == 'ls':
-            print('available domains:')
-            for domain in self._serviceManager.domains:
-                print('\t', domain)
-            return CommandReturnCode.Success
-        # No matching command
-        return CommandReturnCode.Unknown
-
-    def __processSubDomainCommands(self, command):
-        """Process SubDomain related commands
-        usage: [select|create|exit|delete|get|list|ls|current] [sd|subdomain] [SUBDOMAIN]
-        
-        Args:
-            command (string): The command input by the user
-        
-        Returns: The processed commands return code
-        """
-        # Make sure this is a subdomain command
-        if len(command) not in range(2, 4) or (command[1] != 'sd' and command[1] != 'subdomain'):
-            return CommandReturnCode.Unknown
-        # A domain has to be selected for this
-        if self._currentDomain is None:
-            print(ConsoleMod.FAIL + 'a domain has to be selected' + ConsoleMod.ENDC)
-            return CommandReturnCode.Error
-        # Set variables
-        commandName = command[0]
-        subDomainName = command[2] if len(command) == 3 else ''
-
-        # Select (and create if it doesn't exist) a subdomain
-        if commandName == 'select' and subDomainName != '':
-            # Tell user about possibly leaving a previous subdomain
-            if self._currentSubDomain is not None:
-                print('left subdomain "' + str(self._currentSubDomain))
-            # Get the subdomain from the current domain
-            self._currentSubDomain = self._currentDomain.subDomain(subDomainName)
-            print('selected subdomain "' + str(self._currentSubDomain) + '"')
-            return CommandReturnCode.Success
-        # Exit the current domain
-        elif commandName == 'exit':
-            print('left subdomain "' + str(self._currentSubDomain))
-            self._currentSubDomain = None
-            return CommandReturnCode.Success
-        # Create a new subdomain
-        elif commandName == 'create' and subDomainName != '':
-            subdomain = self._currentDomain.subDomain(subDomainName)
-            print('created subdomain "' + str(subdomain) + '"')
-            return CommandReturnCode.Success
-        # Delete a subdomain
-        elif commandName == 'delete' and subDomainName != '':
-            # Get the subdomain
-            subdomain = self._currentDomain.subDomain(subDomainName)
-            subDomainName = str(subdomain)
-            # Now delete it
-            subdomain.delete()
-            print('deleted subdomain "' + subDomainName + '"')
-            return CommandReturnCode.Success
-        # Show the name of the currently selected subdomain
-        elif commandName == 'current':
-            print('current subdomain "' + str(self._currentSubDomain) + '"')
-            return CommandReturnCode.Success
-        # TODO: add a command to show a subdomains details
-        # List all existing subdomains for this domain
-        elif commandName == 'get' or commandName == 'list' or commandName == 'ls':
-            print('available subdomains:')
-            for subdomain in self._currentDomain.subDomains:
-                print('\t', subdomain)
-            return CommandReturnCode.Success
-        # No matching command
-        return CommandReturnCode.Unknown
-
-    def __processModuleCommands(self, command):
-        """Process Module related commands
-        usage: [add|create|delete|rm|clean|up|down|get|list|ls|current] [md|module] [MODULE]
-        
-        Args:
-            command (string): The command input by the user
-        
-        Returns: The processed commands return code
-        """
-        # Make sure this is a module command
-        if len(command) not in range(2, 4) or (command[1] != 'md' and command[1] != 'module'):
-            return CommandReturnCode.Unknown
-        # A subdomain has to be selected for this
-        if self._currentSubDomain is None:
-            print(ConsoleMod.FAIL + 'a subdomain has to be selected' + ConsoleMod.ENDC)
-            return CommandReturnCode.Error
-        # Set variables
-        commandName = command[0]
-        moduleName = command[2] if len(command) == 3 else ''
-
-        # Add a new module to the current subdomain
-        if (commandName == 'add' or commandName == 'create') and moduleName != '':
-            # Create the module and add it to the subdomain
-            module = ModuleLoader.new(moduleName, self._currentSubDomain)
-            self._currentSubDomain.addModule(module)
-            print('created module "' + str(module) + '"')
-            return CommandReturnCode.Success
-        # Delete a module from the current subdomain
-        elif commandName == 'delete' or commandName == 'rm' or commandName == 'clean':
-            moduleName = str(self._currentSubDomain.activeModule)
-            self._currentSubDomain.deleteModule()
-            print('deleted module "' + moduleName + '" from subdomain "' + str(self._currentSubDomain) + '"')
-            return CommandReturnCode.Success
-        # Bring all containers of this module up
-        elif commandName == 'up':
-            # A module has to be active for this
-            if self._currentSubDomain.activeModule is None:
-                print(ConsoleMod.FAIL + 'the current subdomain "' + str(self._currentSubDomain) + '" has no active module' + ConsoleMod.ENDC)
-                return CommandReturnCode.Error
-            # Bring up the module
-            self._currentSubDomain.activeModule.up()
-            print('module "' + str(self._currentSubDomain.activeModule) + '" is coming up')
-            return CommandReturnCode.Success
-        # Shut all containers of this module down
-        elif commandName == 'down':
-            # A module has to be active for this
-            if self._currentSubDomain.activeModule is None:
-                print(ConsoleMod.FAIL + 'the current subdomain "' + str(self._currentSubDomain) + '" has no active module' + ConsoleMod.ENDC)
-                return CommandReturnCode.Error
-            # Shut the containers down
-            self._currentSubDomain.activeModule.down()
-            print('module "' + str(self._currentSubDomain.activeModule) + '" is going down')
-            return CommandReturnCode.Success
-        # TODO: add a command to show container logs
-        # TODO: add a command to show container status
-        # TODO: add a command to show module status (up/down/warning/error)
-        # TODO: add a command to show a modules details
-        # Show the name of the module for the currently selected subdomain
-        elif commandName == 'get' or commandName == 'list' or commandName == 'ls' or commandName == 'current':
-            print('current module "' + str(self._currentSubDomain.activeModule) + '"')
-            return CommandReturnCode.Success
-        # No matching command
-        return CommandReturnCode.Unknown
+        elif 'module' == commandParts[0] or 'md' == commandParts[0]:
+            if None is self._service_manager.currentDomain:
+                print("No domain selected")
+                return
+            if None is self._service_manager.currentSubDomain:
+                print("No subdomain selected")
+                return
+            elif 2 > len(commandParts):
+                pass
+            elif 'get' == commandParts[1] or 'current' == commandParts[1]:
+                if self._service_manager.currentSubDomain.activeModule.isNone():
+                    print("No module configured for this subdomain")
+                else:
+                    print(self._service_manager.currentSubDomain.activeModule)
+                return
+            elif 'list' == commandParts[1] or 'ls' == commandParts[1]:
+                print("Available modules:")
+                for module in ModuleLoader.availableModules:
+                    print(" ", module)
+                return
+            elif 'add' == commandParts[1] or 'create' == commandParts[1]:
+                if 3 == len(commandParts):
+                    self._service_manager.currentSubDomain.addModule(commandParts[2])
+                    print("Module", commandParts[2], "added")
+                    return
+            elif 'delete' == commandParts[1]:
+                if self._service_manager.currentSubDomain.activeModule.isNone():
+                    print("No module configured for this subdomain")
+                else:
+                    moduleName = str(self._service_manager.currentSubDomain.activeModule)
+                    self._service_manager.currentSubDomain.deleteModule()
+                    print("Module", moduleName, "delted")
+                return
+            else:
+                print("Usage:\tmodule COMMAND [MODULE]")
+                print("\tmd COMMAND [MODULE]")
+                print()
+                print("Available Commands:")
+                print(" ", "up\t\t\tBring all the modules docker containers up")
+                print(" ", "down\t\t\tTear all the modules docker containers down")
+                print(" ", "get\t (current)\tGet the configured module for the selected subdomain")
+                print(" ", "list\t (ls)\t\tList all available modules")
+                print(" ", "add\t (create)\tSet the module for the selected subdomain")
+                print(" ", "delete (rm|clean)\tDelete any module form the selected subdomain")
+                print(" ", "help\t\t\tDisplay this help")
+                return
+        # Display help
+        print("Available Commands:")
+        print(" ", "domain\t(dm)\tManage top level domains")
+        print(" ", "subdomain\t(sd)\tManage subdomains of the currently selected top level domain")
+        print(" ", "module\t(md)\tManage the module of the currently selected subdomain")
 
 
 if __name__ == '__main__':

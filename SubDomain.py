@@ -39,6 +39,14 @@ class SubDomain:
     def __repr__(self):
         return self.name
 
+    @property
+    def subName(self) -> str:
+        """Domain name stripped of top level domain part"""
+        if self.topLevelDomain.name == self.name:
+            return self.name
+        else:
+            return self.name[:-1*len(self.topLevelDomain.name)-1]
+
     def addModule(self, module):
         """Add a module to this domain
         

@@ -19,10 +19,10 @@ class Domain:
         name (string): The domain name
         rootDir (string): The root directory all top level domains are in
     """
-    def __init__(self, name, rootDir):
-        self.name = name
+    def __init__(self, name: str, rootDir: str):
+        self.name: str = name
         # This domains top directory
-        self.rootDir = join(rootDir, self.name)
+        self.rootDir: str = join(rootDir, self.name)
         # Make sure top level directory exists
         if not isdir(self.rootDir):
             makedirs(self.rootDir)
@@ -46,6 +46,7 @@ class Domain:
             if domainName != self.name:
                 domainName = domainName[:-1 * len(self.name) - 1]
             self.subDomain(domainName)
+        return self.subDomains
 
     def __repr__(self):
         return self.name
