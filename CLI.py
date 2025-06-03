@@ -128,10 +128,7 @@ class CLI:
                 return
             elif 'select' == commandParts[1] or 'create' == commandParts[1]:
                 if 3 == len(commandParts):
-                    subDomainName: str = commandParts[2]
-                    if subDomainName != self._service_manager.currentDomain.name:
-                        subDomainName = subDomainName[:-1 * len(self._service_manager.currentDomain.name) - 1]
-                    self._service_manager.currentSubDomain = self._service_manager.currentDomain.subDomain(subDomainName)
+                    self._service_manager.currentSubDomain = self._service_manager.currentDomain.subDomain(commandParts[2])
                     print("Subdomain", commandParts[2], "selected")
                     return
             elif 'delete' == commandParts[1]:
@@ -163,12 +160,6 @@ class CLI:
                 return
             elif 2 > len(commandParts):
                 pass
-            elif 'get' == commandParts[1] or 'current' == commandParts[1]:
-                if self._service_manager.currentSubDomain.activeModule.isNone():
-                    print("No module configured for this subdomain")
-                else:
-                    print(self._service_manager.currentSubDomain.activeModule)
-                return
             elif 'list' == commandParts[1] or 'ls' == commandParts[1]:
                 print("Available modules:")
                 for module in ModuleLoader.availableModules:
@@ -176,16 +167,28 @@ class CLI:
                 return
             elif 'add' == commandParts[1] or 'create' == commandParts[1]:
                 if 3 == len(commandParts):
-                    self._service_manager.currentSubDomain.addModule(commandParts[2])
+                    module = ModuleLoader.new(commandParts[2], self._service_manager.currentSubDomain)
+                    self._service_manager.currentSubDomain.addModule(module)
                     print("Module", commandParts[2], "added")
                     return
-            elif 'delete' == commandParts[1]:
-                if self._service_manager.currentSubDomain.activeModule.isNone():
-                    print("No module configured for this subdomain")
-                else:
-                    moduleName = str(self._service_manager.currentSubDomain.activeModule)
-                    self._service_manager.currentSubDomain.deleteModule()
-                    print("Module", moduleName, "delted")
+            elif commandParts[1] in ('up', 'down', 'get', 'current', 'delete', 'rm', 'clean') and self._service_manager.currentSubDomain.activeModule.isNone():
+                print("No module configured for this subdomain")
+                return
+            elif 'up' == commandParts[1]:
+                self._service_manager.currentSubDomain.activeModule.up()
+                print("Module", self._service_manager.currentSubDomain.activeModule, "is coming up")
+                return
+            elif 'down' == commandParts[1]:
+                self._service_manager.currentSubDomain.activeModule.down()
+                print("Module", self._service_manager.currentSubDomain.activeModule, "is going down")
+                return
+            elif 'get' == commandParts[1] or 'current' == commandParts[1]:
+                print(self._service_manager.currentSubDomain.activeModule)
+                return
+            elif 'delete' == commandParts[1] or 'rm' == commandParts[1] or 'clean' == commandParts[1]:
+                moduleName = str(self._service_manager.currentSubDomain.activeModule)
+                self._service_manager.currentSubDomain.deleteModule()
+                print("Module", moduleName, "delted")
                 return
             else:
                 print("Usage:\tmodule COMMAND [MODULE]")
