@@ -49,7 +49,7 @@ class ModuleLoader:
         return envVars
 
     @staticmethod
-    def load(subDomain):
+    def load(subDomain) -> Module:
         """Load a module for the given subdomain, if one exists
         
         Args:

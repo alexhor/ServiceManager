@@ -2,10 +2,9 @@
 
 from os import chown, makedirs, remove
 from os.path import exists, isfile, isdir, join
-import secrets
-import string
+import secrets, string, re
 from socketserver import TCPServer
-from shutil import copy, rmtree
+from shutil import rmtree
 from subprocess import call
 
 import config
@@ -165,3 +164,23 @@ class Module:
         else:
             with open(moduleFile, 'w') as file:
                 file.write('MODULE_NAME=' + self.name + '\n')
+
+    def getContainers(self) -> list[str]:
+        """Get a string list of all containers in this module"""
+        self._prepareTemplateFile()
+        with open(self.moduleTemplate, 'r') as configTemplateFile:
+            configFileContent = configTemplateFile.read()
+        containerMatches = re.findall(r"\n\s+container_name:\s+(?:\${DOMAIN_ESCAPED})_(.+)\s*\n", configFileContent)
+        return containerMatches
+
+    def showContainerLogs(self, containerName):
+        if containerName not in self.getContainers():
+            print('Invalid container name')
+            return
+        envVars = self.envFileToDict()
+        fullContainerName = envVars['DOMAIN_ESCAPED'] + '_' + containerName
+        try:
+            call(['docker', 'logs', '-f', fullContainerName])
+        except KeyboardInterrupt:
+            print()
+            print('Log output ended')

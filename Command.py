@@ -56,23 +56,20 @@ class Command:
 
 
 class Argument(ABC):
+    def __init__(self, serviceManager):
+        self._serviceManager: ServiceManager = serviceManager
+
     @abstractmethod
     def yieldCompletion(self, firstLevelText: str) -> Generator[Completion, None, None]:
         pass
 
 class ArgumentDomain(Argument):
-    def __init__(self, serviceManager):
-        self._serviceManager: ServiceManager = serviceManager
-
     def yieldCompletion(self, text: str) -> Generator[Completion, None, None]:
         for domain in self._serviceManager.domains.values():
             if domain.name.startswith(text):
                 yield Completion(domain.name, start_position=-1*len(text))
 
 class ArgumentSubDomain(Argument):
-    def __init__(self, serviceManager):
-        self._serviceManager: ServiceManager = serviceManager
-
     def yieldCompletion(self, text: str) -> Generator[Completion, None, None]:
         if None is self._serviceManager.currentDomain:
             yield Completion(" ", start_position=-1, display="No top level domain selected")
@@ -81,10 +78,7 @@ class ArgumentSubDomain(Argument):
                 if subdomain.subName.startswith(text):
                     yield Completion(subdomain.subName, start_position=-1*len(text), display=subdomain.name)
 
-class ArgumentModule(ArgumentDomain):
-    def __init__(self, serviceManager):
-        self._serviceManager: ServiceManager = serviceManager
-
+class ArgumentModule(Argument):
     def yieldCompletion(self, text: str) -> Generator[Completion, None, None]:
         if None is self._serviceManager.currentSubDomain:
             yield Completion(" ", start_position=-1, display="No subdomain selected")
@@ -92,3 +86,12 @@ class ArgumentModule(ArgumentDomain):
             for module in ModuleLoader.availableModules:
                 if module.startswith(text):
                     yield Completion(module, start_position=-1*len(text))
+
+class ArgumentContainer(Argument):
+    def yieldCompletion(self, text: str) -> Generator[Completion, None, None]:
+        if None is self._serviceManager.currentSubDomain:
+            yield Completion(" ", start_position=-1, display="No subdomain selected")
+        else:
+            for containerName in self._serviceManager.currentSubDomain.activeModule.getContainers():
+                if containerName.startswith(text):
+                    yield Completion(containerName, start_position=-1*len(text))

@@ -1,7 +1,7 @@
 from typing import Generator
 from prompt_toolkit.completion import Completer, Completion
 
-from Command import ArgumentModule, Command, ArgumentDomain, ArgumentSubDomain
+from Command import ArgumentContainer, ArgumentModule, Command, ArgumentDomain, ArgumentSubDomain
 
 
 class CliCompleter(Completer):
@@ -33,6 +33,7 @@ class CliCompleter(Completer):
                 Command("get", ["current"]),
                 Command("list", ["ls"]),
                 Command("add", ["create"], argList=[ArgumentModule(self._service_manager)]),
+                Command("log", argList=[ArgumentContainer(self._service_manager)]),
                 Command("delete", ["rm", "clean"]),
                 Command("help"),
             ]),

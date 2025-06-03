@@ -171,7 +171,11 @@ class CLI:
                     self._service_manager.currentSubDomain.addModule(module)
                     print("Module", commandParts[2], "added")
                     return
-            elif commandParts[1] in ('up', 'down', 'get', 'current', 'delete', 'rm', 'clean') and self._service_manager.currentSubDomain.activeModule.isNone():
+            # TODO: add a command to show container logs
+            # TODO: add a command to show container status
+            # TODO: add a command to show module status (up/down/warning/error)
+            # TODO: add a command to show a modules details
+            elif commandParts[1] in ('up', 'down', 'get', 'current', 'log', 'delete', 'rm', 'clean') and self._service_manager.currentSubDomain.activeModule.isNone():
                 print("No module configured for this subdomain")
                 return
             elif 'up' == commandParts[1]:
@@ -185,6 +189,10 @@ class CLI:
             elif 'get' == commandParts[1] or 'current' == commandParts[1]:
                 print(self._service_manager.currentSubDomain.activeModule)
                 return
+            elif 'log' == commandParts[1]:
+                if 3 == len(commandParts):
+                    self._service_manager.currentSubDomain.activeModule.showContainerLogs(commandParts[2])
+                    return
             elif 'delete' == commandParts[1] or 'rm' == commandParts[1] or 'clean' == commandParts[1]:
                 moduleName = str(self._service_manager.currentSubDomain.activeModule)
                 self._service_manager.currentSubDomain.deleteModule()
