@@ -12,7 +12,7 @@ class MysqlWebserver(Webserver, MySql, Module):
         Args:
             subDomain (SubDomain): The subdomain this module is installed on
         """
-        self.requiredDirs = ['mysql', 'php']
+        self.requiredDirs = ['mysql', 'php', 'php.ini']
         super().__init__(subDomain)
 
     def _createEnvFile(self):

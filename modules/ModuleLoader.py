@@ -12,17 +12,19 @@ from .Odoo import Odoo
 from .UptimeKuma import UptimeKuma
 from .FreeScout import FreeScout
 from .Mumble import Mumble
+from .Codeigniter import Codeigniter
 
 class ModuleLoader:
     availableModules = {
-        'Webserver' :   Webserver,
-        'WordPress' :   WordPress,
-        'Nextcloud' :   Nextcloud,
-        'Zammad'    :   Zammad,
-        'Odoo'      :   Odoo,
-        'UptimeKuma':   UptimeKuma,
-        'FreeScout':   FreeScout,
-        'Mumble':   Mumble,
+        'Webserver'  :   Webserver,
+        'WordPress'  :   WordPress,
+        'Nextcloud'  :   Nextcloud,
+        'Zammad'     :   Zammad,
+        'Odoo'       :   Odoo,
+        'UptimeKuma' :   UptimeKuma,
+        'FreeScout'  :   FreeScout,
+        'Mumble'     :   Mumble,
+        'Codeigniter':  Codeigniter,
     }
 
     @staticmethod
