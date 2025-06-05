@@ -184,3 +184,15 @@ class Module:
         except KeyboardInterrupt:
             print()
             print('Log output ended')
+
+    def runContainerCmd(self, containerName, command="/bin/bash"):
+        if containerName not in self.getContainers():
+            print('Invalid container name')
+            return
+        envVars = self.envFileToDict()
+        fullContainerName = envVars['DOMAIN_ESCAPED'] + '_' + containerName
+        try:
+            call(['docker', 'exec', '-it', fullContainerName, command])
+        except KeyboardInterrupt:
+            print()
+            print('Container command ended')

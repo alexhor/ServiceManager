@@ -34,6 +34,7 @@ class CliCompleter(Completer):
                 Command("list", ["ls"]),
                 Command("add", ["create"], argList=[ArgumentModule(self._service_manager)]),
                 Command("log", argList=[ArgumentContainer(self._service_manager)]),
+                Command("command", ["cmd"], argList=[ArgumentContainer(self._service_manager)]),
                 Command("delete", ["rm", "clean"]),
                 Command("help"),
             ]),

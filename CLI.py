@@ -193,6 +193,11 @@ class CLI:
                 if 3 == len(commandParts):
                     self._service_manager.currentSubDomain.activeModule.showContainerLogs(commandParts[2])
                     return
+            elif 'command' == commandParts[1] or 'cmd' == commandParts[1]:
+                if 3 <= len(commandParts):
+                    command = ' '.join(commandParts[3:]) if 4 <= len(commandParts) else '/bin/bash'
+                    self._service_manager.currentSubDomain.activeModule.runContainerCmd(commandParts[2], command)
+                    return
             elif 'delete' == commandParts[1] or 'rm' == commandParts[1] or 'clean' == commandParts[1]:
                 moduleName = str(self._service_manager.currentSubDomain.activeModule)
                 self._service_manager.currentSubDomain.deleteModule()
@@ -208,6 +213,8 @@ class CLI:
                 print(" ", "get\t (current)\tGet the configured module for the selected subdomain")
                 print(" ", "list\t (ls)\t\tList all available modules")
                 print(" ", "add\t (create)\tSet the module for the selected subdomain")
+                print(" ", "log\t\t\tShow a containers log output")
+                print(" ", "command\t (cmd)\tRun an interactive command in a container (default: /bin/bash)")
                 print(" ", "delete (rm|clean)\tDelete any module form the selected subdomain")
                 print(" ", "help\t\t\tDisplay this help")
                 return
