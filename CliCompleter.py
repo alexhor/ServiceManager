@@ -49,7 +49,7 @@ class CliCompleter(Completer):
         commandList = command.subcommandList if None is not command else self._commands
         for cmd in commandList:
             if 0 < len(textSplit):
-                if cmd.command == firstLevelText:
+                if cmd.command == firstLevelText or firstLevelText in cmd.aliasList:
                     firstLevelCommand = cmd
             else:
                 if cmd.command.startswith(firstLevelText):
