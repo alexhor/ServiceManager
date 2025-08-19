@@ -10,5 +10,5 @@ used_proxy: Proxy = Proxy.traefik
 handle_ssl_certificates: bool = False
 
 docker_compose_command: list[str] = ["docker", "compose"]
-root_dir = join('/', 'var', 'www', 'services')
+root_dir = join('/', 'srv', 'services')
 

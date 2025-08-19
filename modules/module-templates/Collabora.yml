@@ -1,0 +1,27 @@
+# docker-compose file for a Collabora Office Online installation
+services:
+  ${DOMAIN_ESCAPED}_collabora:
+    container_name: ${DOMAIN_ESCAPED}_collabora
+    image: collabora/code:latest
+    networks:
+      - ${DOMAIN_ESCAPED}
+      - proxy
+    cap_add:
+      - MKNOD
+    environment:
+      - aliasgroup1=https://cloud.h-software.de
+      #- aliasgroup2=https://nextcloud.euredomain.de
+      - username=admin
+      - password=${ADMIN_PASSWORD}
+      - "extra_params=--o:ssl.enable=false --o:ssl.termination=true"
+    restart: always
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.${DOMAIN_ESCAPED}.rule=Host(`${DOMAIN}`)
+      - traefik.http.routers.${DOMAIN_ESCAPED}.tls.certresolver=LetsEncrypt
+
+networks:
+  ${DOMAIN_ESCAPED}:
+  proxy:
+    name: proxy
+    external: true

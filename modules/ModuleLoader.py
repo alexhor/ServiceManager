@@ -13,6 +13,7 @@ from .UptimeKuma import UptimeKuma
 from .FreeScout import FreeScout
 from .Mumble import Mumble
 from .Codeigniter import Codeigniter
+from .Collabora import Collabora
 
 class ModuleLoader:
     availableModules = {
@@ -25,6 +26,7 @@ class ModuleLoader:
         'FreeScout'  :   FreeScout,
         'Mumble'     :   Mumble,
         'Codeigniter':  Codeigniter,
+        'Collabora'  :  Collabora,
     }
 
     @staticmethod
