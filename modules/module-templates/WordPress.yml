@@ -8,7 +8,7 @@ services:
       MYSQL_USER: wordpress
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-    image: mysql:8.0
+    image: mysql:latest
     networks:
       - ${DOMAIN_ESCAPED}
     restart: always
