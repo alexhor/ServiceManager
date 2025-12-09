@@ -1,11 +1,17 @@
 #!/usr/bin/python3
-
+import shutil
 from os import listdir
-from os.path import isfile, join
+from os.path import isfile, join, dirname
+
+# Create config file if nonexistent
+if not isfile(join(dirname(__file__), "config.py")):
+    shutil.copy(join(dirname(__file__), "config_example.py"), join(dirname(__file__), "config.py"))
+    print("Copied example config to config.py")
+
+import config
 
 from Domain import Domain
 from SubDomain import SubDomain
-import config
 
 
 class ServiceManager:
@@ -35,13 +41,13 @@ class ServiceManager:
     @currentDomain.setter
     def currentDomain(self, domain):
         self._currentDomain = domain
-    
+
     @property
     def currentSubDomain(self):
         if None is self.currentDomain:
             return None
         return self._currentSubDomain
-    
+
     @currentSubDomain.setter
     def currentSubDomain(self, subdomain):
         if None is self.currentDomain:
