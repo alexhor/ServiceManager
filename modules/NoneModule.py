@@ -1,4 +1,6 @@
 #!/usr/bin/python3
+from os import remove
+from os.path import join, isfile
 
 from .Module import Module
 
@@ -13,10 +15,10 @@ class NoneModule(Module):
         pass
 
     def isNone(self):
-        """States wether this is a proper module or not
+        """States whether this is a proper module or not
         
         Returns:
-            bool: Wether this is a proper module or not
+            bool: Whether this is a proper module or not
         """
         return True
 
