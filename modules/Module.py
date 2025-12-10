@@ -66,9 +66,35 @@ class Module:
             return s.server_address[1]
 
     def _createEnvFile(self):
-        """Put all requried parameters into an .env file in the subdomains root directory"""
-        # This has to be done by the individual modules
-        pass
+        """Put all required parameters into an .env file in the subdomains root directory"""
+        # TODO rename URL & PATH to MODULE_
+        default_vars = {
+            'DOMAIN'        : str(self.subDomain),
+            'DOMAIN_ESCAPED': str(self.subDomain).replace('.', '-'),
+            'DOMAIN_URL'    : 'https://' + str(self.subDomain),
+            'DOMAIN_PATH'   : self.subDomain.rootDir,
+        }
+        with open(self.envFile, 'w') as envFile:
+            envFile.writelines(f'{name}={value}\n' for (name, value) in (default_vars | self._getCustomEnvVars()).items())
+
+    def _getCustomEnvVars(self) -> dict[str, str]:
+        """
+        Obtain custom environment variables for this module.
+
+        Subclasses should override this method to add environment variables to the module's configuration.
+
+        The following variables are created by default:
+
+        - `DOMAIN`: FQDN of the subdomain this module is added to
+        - `DOMAIN_ESCAPED`: FQDN with dashes instead of dots separating levels
+        - `MODULE_URL`: URL to the module's content root
+        - `MODULE_PATH`: File system path to the module's content root on the *host disk*
+
+        Returns:
+            A dictionary of additional <variable name> : <value> mappings.
+
+        """
+        return dict()
 
     def envFileToDict(self):
         """Get a dictionary representation of this modules env file

@@ -22,14 +22,11 @@ class Odoo(Module):
                 configFile.write('data_dir = /var/lib/odoo\n')
                 configFile.write('\n')
 
-    def _createEnvFile(self):
-        """Put all required parameters into an .env file in the subdomains root directory"""
+    def _getCustomEnvVars(self) -> dict[str, str]:
         self.exposedPort = self.getFreePort()
         self.livechatPort = self.getFreePort()
-        with open(self.envFile, 'w') as envFile:
-            envFile.write('DOMAIN=' + str(self.subDomain) + '\n')
-            envFile.write('DOMAIN_ESCAPED=' + str(self.subDomain).replace('.', '-') + '\n')
-            envFile.write('HTTP_PORT=' + str(self.exposedPort) + '\n')
-            envFile.write('DOMAIN_PATH=' + self.subDomain.rootDir + '\n')
-            envFile.write('POSTGRES_PASSWORD=' + self.password() + '\n')
-            envFile.write('LIVECHAT_PORT=' + str(self.livechatPort) + '\n')
+        return {
+            'HTTP_PORT'        : str(self.exposedPort),
+            'POSTGRES_PASSWORD': self.password(),
+            'LIVECHAT_PORT'    : str(self.livechatPort),
+        }
