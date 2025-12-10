@@ -6,6 +6,7 @@ from shutil import rmtree
 
 from SubDomain import SubDomain
 
+
 class Domain:
     """A top level domain"""
     # A list of all default folders
@@ -13,13 +14,13 @@ class Domain:
     # A list of directories to ignore when looking for subdomains
     nonDomainDirs = ('bin', 'tmp')
 
-    """Make sure every required folder and file for this domain exists
-    
-    Args:
-        name (string): The domain name
-        rootDir (string): The root directory all top level domains are in
-    """
     def __init__(self, name: str, rootDir: str):
+        """Make sure every required folder and file for this domain exists
+
+        Args:
+            name (string): The domain name
+            rootDir (string): The root directory all top level domains are in
+        """
         self.name: str = name
         # This domains top directory
         self.rootDir: str = join(rootDir, self.name)
@@ -53,10 +54,10 @@ class Domain:
 
     def subDomain(self, name):
         """Add a new or get an existing subdomain
-        
+
         Args:
             name (string): The name of the subdomain
-        
+
         Returns:
             SubDomain: The created subdomain
         """
@@ -72,7 +73,7 @@ class Domain:
 
     def deleteSubDomain(self, subDomain):
         """Delete an existing subdomain
-        
+
         Args:
             name (subDomain): The subdomain to delete
         """

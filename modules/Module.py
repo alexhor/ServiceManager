@@ -1,10 +1,11 @@
 #!/usr/bin/python3
-
+import re
+import secrets
+import string
 from os import chown, makedirs, remove
 from os.path import exists, isfile, isdir, join
-import secrets, string, re
-from socketserver import TCPServer
 from shutil import rmtree
+from socketserver import TCPServer
 from subprocess import call
 
 import config
@@ -18,7 +19,7 @@ class Module:
 
     def __init__(self, subDomain):
         """An abstract base module
-        
+
         Args:
             subDomain (SubDomain): The subdomain this module is installed on
         """
@@ -42,12 +43,12 @@ class Module:
         return type(self).__name__
 
     @staticmethod
-    def password(length = 255):
+    def password(length=255):
         """Generate a secure password
-        
+
         Args:
             length (int): The passwords length
-        
+
         Returns:
             string: A secure password
         """
@@ -57,7 +58,7 @@ class Module:
     @staticmethod
     def getFreePort():
         """Get a port available for binding
-        
+
         Returns:
             int: A free port
         """
@@ -71,7 +72,7 @@ class Module:
 
     def envFileToDict(self):
         """Get a dictionary representation of this modules env file
-        
+
         Returns:
             dict: The converted env file
         """
@@ -80,7 +81,7 @@ class Module:
     @staticmethod
     def fileToDict(filePath):
         """Get a dictionary representation of a file
-        
+
         Args:
             filePath (string): Path to the file to convert
         Returns:
@@ -139,24 +140,24 @@ class Module:
         remove(self.envFile)
         # Delete all required dirs
         for dirName in self.requiredDirs:
-            dirPath=join(self.subDomain.rootDir, dirName)
+            dirPath = join(self.subDomain.rootDir, dirName)
             if isdir(dirPath):
                 rmtree(dirPath)
         self.save(True)
 
     def isNone(self):
-        """States wether this is a proper module or not
-        
+        """States whether this is a proper module or not
+
         Returns:
-            bool: Wether this is a proper module or not
+            bool: Whether this is a proper module or not
         """
         return False
 
     def save(self, delete=False):
         """Save this module to the current subdomain
-        
+
         Args:
-            delete (bool): Wether the current module should be deleted"""
+            delete (bool): Whether the current module should be deleted"""
         moduleFile = join(self.subDomain.rootDir, '.module')
         if delete:
             if isfile(moduleFile):

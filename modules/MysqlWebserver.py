@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 
-from .Webserver import Webserver
-from .MySql import MySql
 from .Module import Module
+from .MySql import MySql
+from .Webserver import Webserver
 
 
 class MysqlWebserver(Webserver, MySql, Module):
@@ -16,7 +16,7 @@ class MysqlWebserver(Webserver, MySql, Module):
         super().__init__(subDomain)
 
     def _createEnvFile(self):
-        """Put all requried parameters into an .env file in the subdomains root directory"""
+        """Put all required parameters into an .env file in the subdomains root directory"""
         self.exposedPort = self.getFreePort()
         with open(self.envFile, 'w') as envFile:
             envFile.write('DOMAIN=' + str(self.subDomain) + '\n')

@@ -2,6 +2,7 @@
 
 from .Module import Module
 
+
 class Mumble(Module):
     def __init__(self, subDomain):
         """A Mumble installation

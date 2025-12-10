@@ -56,10 +56,10 @@ class ServiceManager:
 
     def domain(self, name):
         """Add a new or get an existing domain
-        
+
         Args:
             name (string): The name of the domain
-        
+
         Returns:
             Domain: The created domain
         """
@@ -73,9 +73,9 @@ class ServiceManager:
 
     def deleteDomain(self, domain):
         """Delete a top level domain
-        
+
         Args:
-            name (Domain): The domain to delete
+            domain (Domain): The domain to delete
         """
         name = domain.__str__()
         # Delete the domain

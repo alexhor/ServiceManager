@@ -1,9 +1,6 @@
 #!/usr/bin/python3
 
-from os import makedirs
-from os.path import isfile, isdir
-from subprocess import run
-from distutils.dir_util import copy_tree
+from os.path import isfile
 
 from .Module import Module
 
@@ -26,7 +23,7 @@ class Odoo(Module):
                 configFile.write('\n')
 
     def _createEnvFile(self):
-        """Put all requried parameters into an .env file in the subdomains root directory"""
+        """Put all required parameters into an .env file in the subdomains root directory"""
         self.exposedPort = self.getFreePort()
         self.livechatPort = self.getFreePort()
         with open(self.envFile, 'w') as envFile:

@@ -5,9 +5,10 @@ from os.path import isfile, isdir, join
 from shutil import rmtree
 from subprocess import call
 
+import config
 from modules.ModuleLoader import ModuleLoader
 from modules.NoneModule import NoneModule
-import config
+
 
 class SubDomain:
     """A domain that can host a module"""
@@ -20,7 +21,7 @@ class SubDomain:
 
     def __init__(self, name, topLevelDomain):
         """Make sure every required folder and file for this domain exists
-        
+
         Args:
             name (string): The domains name
         """
@@ -45,11 +46,11 @@ class SubDomain:
         if self.topLevelDomain.name == self.name:
             return self.name
         else:
-            return self.name[:-1*len(self.topLevelDomain.name)-1]
+            return self.name[:-1 * len(self.topLevelDomain.name) - 1]
 
     def addModule(self, module):
         """Add a module to this domain
-        
+
         Args:
             module (Module): The module to add
         """
@@ -68,9 +69,9 @@ class SubDomain:
         self.deleteModule()
         rmtree(self.rootDir, ignore_errors=True)
 
-    def haproxyConfig(self, delete = False):
+    def haproxyConfig(self, delete=False):
         """Configure haproxy to redirect to this domains module
-        
+
         Args:
             delete (bool): Delete or add the given rule
         """
@@ -112,7 +113,7 @@ class SubDomain:
                         continue
                 # Special handling for frontend
                 elif isFrontend:
-                    # Make sure the subdomains ssl certificate is beeing loaded
+                    # Make sure the subdomains ssl certificate is being loaded
                     if '\tbind *:80\n' == prevLine:
                         certString = ' crt ' + self._sslCertificateFile
                         # Add ssl binding if it is missing
@@ -157,9 +158,9 @@ class SubDomain:
         # Load new configuration
         call(['systemctl', 'reload', 'haproxy'])
 
-    def _setupSsl(self, forceRenewal = False):
+    def _setupSsl(self, forceRenewal=False):
         """Setup this subdomain to allow connections over https
-        
+
         Args:
             forceRenewal (bool): If the renewal should be forced
         """
@@ -173,10 +174,10 @@ class SubDomain:
                 return
             # Forcefully renew this subdomains certificate
             else:
-                pass # // TODO: implement forced renewal
+                pass  # TODO: implement forced renewal
         # Request a certificate for the first time
         call(['certbot', 'certonly', '--standalone', '-d', self.name, '--non-interactive', '--agree-tos',
-                '--email', 'alexander@h-software.de', '--http-01-port=8888'])
+              '--email', 'alexander@h-software.de', '--http-01-port=8888'])
         if not isdir(certFolder):
             makedirs(certFolder)
         # Create combined certificate file for haproxy to use

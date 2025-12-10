@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 
-from .Webserver import Webserver
-from .MySql import MySql
 from .Module import Module
+from .MySql import MySql
+from .Webserver import Webserver
 
 
 class FreeScout(Webserver, MySql, Module):
@@ -24,4 +24,3 @@ class FreeScout(Webserver, MySql, Module):
             envFile.write('DOMAIN_PATH=' + self.subDomain.rootDir + '\n')
             envFile.write('MYSQL_PASSWORD=' + self.password() + '\n')
             envFile.write('MYSQL_ROOT_PASSWORD=' + self.password() + '\n')
-

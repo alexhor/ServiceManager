@@ -3,14 +3,13 @@
 from os import chown
 from os.path import join
 
-from .Webserver import Webserver
 from .Module import Module
 
 
 class Zammad(Module):
     def __init__(self, subDomain):
         """A Zammad installation
-        
+
         Args:
             subDomain (SubDomain): The subdomain this module is installed on
         """
@@ -20,7 +19,7 @@ class Zammad(Module):
         chown(join(self.subDomain.rootDir, 'elasticsearch'), 1001, 1001)
 
     def _createEnvFile(self):
-        """Put all requried parameters into an .env file in the subdomains root directory"""
+        """Put all required parameters into an .env file in the subdomains root directory"""
         self.exposedPort = self.getFreePort()
         with open(self.envFile, 'w') as envFile:
             envFile.write('DOMAIN=' + str(self.subDomain) + '\n')
@@ -31,4 +30,3 @@ class Zammad(Module):
             envFile.write('POSTGRES_PASSWORD=' + self.password(30) + '\n')
             envFile.write('IMAGE_REPO=zammad/zammad-docker-compose\n')
             envFile.write('VERSION=-latest\n')
-

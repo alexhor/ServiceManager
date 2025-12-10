@@ -88,7 +88,7 @@ class CLI:
                     self._service_manager.deleteDomain(commandParts[2])
                     self._service_manager.currentDomain = None
                     self._service_manager.currentSubDomain = None
-                    print("Domain", commandParts[2], "delted")
+                    print("Domain", commandParts[2], "deleted")
                     return
             else:
                 print("Usage:\tdomain COMMAND [DOMAIN]")
@@ -137,7 +137,7 @@ class CLI:
                 if 3 == len(commandParts):
                     self._service_manager.currentDomain.deleteSubDomain(commandParts[2])
                     self._service_manager.currentSubDomain = None
-                    print("Subdomain", commandParts[2], "delted")
+                    print("Subdomain", commandParts[2], "deleted")
                     return
             else:
                 print("Usage:\tsubdomain COMMAND [SUBDOMAIN]")
@@ -207,7 +207,7 @@ class CLI:
             elif 'delete' == commandParts[1] or 'rm' == commandParts[1] or 'clean' == commandParts[1]:
                 moduleName = str(self._service_manager.currentSubDomain.activeModule)
                 self._service_manager.currentSubDomain.deleteModule()
-                print("Module", moduleName, "delted")
+                print("Module", moduleName, "deleted")
                 return
             else:
                 print("Usage:\tmodule COMMAND [MODULE]")
