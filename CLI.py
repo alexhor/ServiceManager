@@ -1,11 +1,13 @@
 #!/usr/bin/python3
 
 from enum import Enum
+
 from prompt_toolkit import PromptSession
 
 from CliCompleter import CliCompleter
 from ServiceManager import ServiceManager
 from modules.ModuleLoader import ModuleLoader
+
 
 class CommandReturnCode(Enum):
     Unknown = 0
@@ -166,7 +168,11 @@ class CLI:
                     print(" ", module)
                 return
             elif 'add' == commandParts[1] or 'create' == commandParts[1]:
-                if 3 == len(commandParts):
+                if not self._service_manager.currentSubDomain.activeModule.isNone():
+                    print("A module is already assigned to this subdomain (use \"module get\" to display).")
+                    print("Refusing to overwrite!")
+                    return
+                elif 3 == len(commandParts):
                     module = ModuleLoader.new(commandParts[2], self._service_manager.currentSubDomain)
                     self._service_manager.currentSubDomain.addModule(module)
                     print("Module", commandParts[2], "added")
