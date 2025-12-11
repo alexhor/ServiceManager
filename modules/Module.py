@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 import secrets
+import shutil
 import string
 from os import chown, makedirs, remove
 from os.path import exists, isfile, isdir, join, dirname
@@ -138,17 +139,8 @@ class Module:
 
     def _generateComposeFile(self):
         """Generate the compose file for this module and save it to the module directory."""
-        configFileContent = ''
-        # Get the config template file
-        with open(self.moduleTemplate, 'r') as configTemplateFile:
-            configFileContent = configTemplateFile.read()
-        # Replace template variables
-        for key, value in self.envVars.items():
-            configFileContent = configFileContent.replace('${' + key + '}', value)
-
-        # Write final config file
-        with open(self.composeFile, 'w') as configFile:
-            configFile.write(configFileContent)
+        # Since there are no moving parts in the templates, a simple copy is sufficient
+        shutil.copy(self.moduleTemplate, self.composeFile)
 
     def up(self):
         """Bring up this modules containers"""
