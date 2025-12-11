@@ -146,7 +146,7 @@ class Module:
         """Bring up this modules containers"""
         self._prepareTemplateFile()
         # Bring up containers
-        call(config.docker_compose_command + ['-f', self.tmpConfigFile, 'up', '-d'])
+        self._call_compose('up', '-d')
         # Configure haproxy
         self.subDomain.haproxyConfig()
         self.save()
@@ -154,7 +154,7 @@ class Module:
     def down(self):
         """Stop all running containers"""
         self._prepareTemplateFile()
-        call(config.docker_compose_command + ['-f', self.tmpConfigFile, 'down'])
+        self._call_compose('down')
         # Configure haproxy
         self.subDomain.haproxyConfig(True)
         self.save()
@@ -162,7 +162,7 @@ class Module:
     def clean(self):
         """Delete all existing data"""
         self.down()
-        call(config.docker_compose_command + ['-f', self.tmpConfigFile, 'rm'])
+        self._call_compose('rm')
         remove(self.envFile)
         # Delete all required dirs
         for dirName in self.requiredDirs:
@@ -223,3 +223,21 @@ class Module:
         except KeyboardInterrupt:
             print()
             print('Container command ended')
+
+    def _call_compose(self, *args):
+        """
+        Execute docker compose with the given arguments.
+
+        This function uses the binary specified in config.py,
+        appends --project-directory and the generated -f docker-compose.yml,
+        as well as the -p ${DOMAIN_ESCAPED} project name;
+        and then adds whatever arguments were supplied to the function
+
+        Args:
+            *args (str): Compose command to execute
+        """
+        return call(
+            config.docker_compose_command
+            + ['-f', self.tmpConfigFile]
+            + list(args)
+        )
