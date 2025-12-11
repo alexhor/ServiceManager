@@ -1,12 +1,11 @@
 #!/usr/bin/python3
-import re
 import secrets
 import string
 from os import chown, makedirs, remove
 from os.path import exists, isfile, isdir, join, dirname
 from shutil import rmtree
 from socketserver import TCPServer
-from subprocess import call
+from subprocess import call, run, CompletedProcess
 
 import config
 
@@ -171,7 +170,7 @@ class Module:
     def clean(self):
         """Delete all existing data"""
         self.down()
-        self._call_compose('rm')
+        self._call_compose('rm', '-v')
         remove(self.envFile)
         # Delete all required dirs
         for dirName in self.requiredDirs:
@@ -181,11 +180,7 @@ class Module:
         self.save(True)
 
     def isNone(self):
-        """States whether this is a proper module or not
-
-        Returns:
-            bool: Whether this is a proper module or not
-        """
+        """States whether this is a proper module or not"""
         return False
 
     def save(self, delete=False):
@@ -202,51 +197,66 @@ class Module:
                 file.write('MODULE_NAME=' + self.name + '\n')
 
     def getContainers(self) -> list[str]:
-        """Get a string list of all containers in this module"""
+        """Get a string list of all running containers in this module"""
         self._generateComposeFile()
-        with open(self.moduleTemplate, 'r') as configTemplateFile:
-            configFileContent = configTemplateFile.read()
-        containerMatches = re.findall(r"\n\s+container_name:\s+(?:\${DOMAIN_ESCAPED})_(.+)\s*\n", configFileContent)
-        return containerMatches
+        out_services: str = self._run_compose('ps', '--services').stdout
+        return out_services.splitlines()
 
     def showContainerLogs(self, containerName):
         if containerName not in self.getContainers():
-            print('Invalid container name')
+            print('Invalid service name')
             return
-        fullContainerName = self._domain_escaped + '_' + containerName
         try:
-            call(['docker', 'logs', '-f', fullContainerName])
+            self._call_compose('logs', '-f', containerName)
         except KeyboardInterrupt:
             print()
             print('Log output ended')
 
-    def runContainerCmd(self, containerName, command="/bin/bash"):
+    def runContainerCmd(self, containerName, cmd_binary="/bin/bash", *args):
         if containerName not in self.getContainers():
-            print('Invalid container name')
+            print('Invalid service name')
             return
-        fullContainerName = self._domain_escaped + '_' + containerName
         try:
-            call(['docker', 'exec', '-it', fullContainerName, command])
+            self._call_compose('exec', '-it', containerName, cmd_binary, *args)
         except KeyboardInterrupt:
             print()
             print('Container command ended')
 
-    def _call_compose(self, *args):
+    def _call_compose(self, *args) -> int:
         """
         Execute docker compose with the given arguments.
 
-        This function uses the binary specified in config.py,
-        appends the generated -f docker-compose.yml,
-        and then adds whatever arguments were supplied to the function
+        Args:
+            *args (str): Compose command to execute. Passed to `_compile_compose_args`
+
+        Returns:
+            int: Exit code of the subprocess
+        """
+        return call(self._compile_compose_args(*args))
+
+    def _run_compose(self, *args) -> CompletedProcess:
+        """
+        Execute docker compose with the given arguments, capturing text _(i.e. encoded)_ output
+
+        Args:
+            *args (str): Compose command to execute. Passed to `_compile_compose_args`
+
+        Returns:
+            CompletedProcess: Exit code of the subprocess
+        """
+        return run(self._compile_compose_args(*args), capture_output=True, text=True)
+
+    def _compile_compose_args(self, *args) -> list[str]:
+        """
+        Compile arguments for a `docker compose` call into a single list for e.g. `subprocess.call`.
+
+        This function takes the argument list specified in config.py,
+        appends the generated `-f docker-compose.yml` and then all parameters passes to this function.
 
         Args:
             *args (str): Compose command to execute
         """
-        return call(
-            config.docker_compose_command
-            + ['-f', self.composeFile]
-            + list(args)
-        )
+        return config.docker_compose_command + ['-f', self.composeFile] + list(args)
 
     @property
     def _domain_escaped(self) -> str:

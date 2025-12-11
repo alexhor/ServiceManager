@@ -201,8 +201,8 @@ class CLI:
                     return
             elif 'command' == commandParts[1] or 'cmd' == commandParts[1]:
                 if 3 <= len(commandParts):
-                    command = ' '.join(commandParts[3:]) if 4 <= len(commandParts) else '/bin/bash'
-                    self._service_manager.currentSubDomain.activeModule.runContainerCmd(commandParts[2], command)
+                    cmd_args = commandParts[3:] if 4 <= len(commandParts) else ['/bin/bash']
+                    self._service_manager.currentSubDomain.activeModule.runContainerCmd(commandParts[2], *cmd_args)
                     return
             elif 'delete' == commandParts[1] or 'rm' == commandParts[1] or 'clean' == commandParts[1]:
                 moduleName = str(self._service_manager.currentSubDomain.activeModule)
