@@ -77,10 +77,11 @@ class Module:
         """
         # TODO rename URL & PATH to MODULE_URL & MODULE_ROOT for future path-prefix modules
         default_vars = {
-            'DOMAIN'        : str(self.subDomain),
-            'DOMAIN_ESCAPED': self._domain_escaped,
-            'DOMAIN_URL'    : 'https://' + str(self.subDomain),
-            'DOMAIN_PATH'   : self.subDomain.rootDir,
+            'DOMAIN'              : str(self.subDomain),
+            'DOMAIN_ESCAPED'      : self._domain_escaped,
+            'DOMAIN_URL'          : 'https://' + str(self.subDomain),
+            'DOMAIN_PATH'         : self.subDomain.rootDir,
+            'COMPOSE_PROJECT_NAME': '${DOMAIN_ESCAPED}'
         }
         # Keys in the latter dictionary take precedence -> subclass method can override default variables
         combined_vars = default_vars | self._getCustomEnvVars()
@@ -236,7 +237,6 @@ class Module:
 
         This function uses the binary specified in config.py,
         appends the generated -f docker-compose.yml,
-        as well as the -p ${DOMAIN_ESCAPED} project name;
         and then adds whatever arguments were supplied to the function
 
         Args:
@@ -244,8 +244,7 @@ class Module:
         """
         return call(
             config.docker_compose_command
-            + ['-f', self.composeFile,
-               '-p', self._domain_escaped]
+            + ['-f', self.composeFile]
             + list(args)
         )
 
