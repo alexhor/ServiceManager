@@ -66,8 +66,12 @@ class Module:
         with TCPServer(('localhost', 0), None) as s:
             return s.server_address[1]
 
-    def _createEnvFile(self):
-        """Put all required parameters into an .env file in the subdomains root directory"""
+    def _createOrUpdateEnvFile(self) -> dict[str, str]:
+        """Put all required parameters into an .env file in the subdomains root directory, adding new values if unset
+
+        Returns:
+            dict[str, str]: The variables committed to file
+        """
         # TODO rename URL & PATH to MODULE_URL & MODULE_ROOT for future path-prefix modules
         default_vars = {
             'DOMAIN'        : str(self.subDomain),
@@ -75,8 +79,19 @@ class Module:
             'DOMAIN_URL'    : 'https://' + str(self.subDomain),
             'DOMAIN_PATH'   : self.subDomain.rootDir,
         }
+        # Keys in the latter dictionary take precedence -> subclass method can override default variables
+        combined_vars = default_vars | self._getCustomEnvVars()
+
+        # If file already exists, update new values only
+        if isfile(self.envFile):
+            # Same precedence applies -> values from file take precedence
+            combined_vars = combined_vars | Module.fileToDict(self.envFile)
+
+        # Save combined variables to file
         with open(self.envFile, 'w') as envFile:
-            envFile.writelines(f'{name}={value}\n' for (name, value) in (default_vars | self._getCustomEnvVars()).items())
+            envFile.writelines(f'{name}={value}\n' for (name, value) in combined_vars.items())
+
+        return combined_vars
 
     def _getCustomEnvVars(self) -> dict[str, str]:
         """
