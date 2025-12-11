@@ -9,8 +9,6 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     image: postgres:15
     user: root
-    networks:
-      - ${DOMAIN_ESCAPED}
     restart: always
     volumes:
       - ./postgresql:/var/lib/postgresql/data
@@ -26,7 +24,7 @@ services:
     image: odoo:17
     user: root
     networks:
-      - ${DOMAIN_ESCAPED}
+      - default
       - proxy
     #ports:
     #  - "${LIVECHAT_PORT}:8072"
@@ -47,7 +45,6 @@ services:
       - traefik.http.routers.${COMPOSE_PROJECT_NAME}.tls.certresolver=LetsEncrypt
 
 networks:
-  ${DOMAIN_ESCAPED}:
   proxy:
     name: proxy
     external: true

@@ -67,8 +67,6 @@ services:
     <<: *zammad-service
     container_name: ${DOMAIN_ESCAPED}_zammad-backup
     command: ["zammad-backup"]
-    networks:
-      - ${DOMAIN_ESCAPED}
     volumes:
       - ./zammad-backup:/var/tmp/zammad
       - ./zammad:/opt/zammad/storage:ro
@@ -77,8 +75,6 @@ services:
   ${DOMAIN_ESCAPED}_zammad-elasticsearch:
     container_name: ${DOMAIN_ESCAPED}_zammad-elasticsearch
     image: bitnami/elasticsearch:${ELASTICSEARCH_VERSION:-8.18.0}
-    networks:
-      - ${DOMAIN_ESCAPED}
     restart: ${RESTART:-always}
     volumes:
       - ./elasticsearch:/bitnami/elasticsearch/data
@@ -95,8 +91,6 @@ services:
     <<: *zammad-service
     container_name: ${DOMAIN_ESCAPED}_zammad-init
     command: ["zammad-init"]
-    networks:
-      - ${DOMAIN_ESCAPED}
     depends_on:
       - ${DOMAIN_ESCAPED}-postgresql
     restart: on-failure
@@ -106,8 +100,6 @@ services:
     container_name: ${DOMAIN_ESCAPED}_zammad-memcached
     command: memcached -m 256M
     image: memcached:${MEMCACHE_VERSION:-1.6.38-alpine}
-    networks:
-      - ${DOMAIN_ESCAPED}
     restart: ${RESTART:-always}
 
   ${DOMAIN_ESCAPED}_zammad-nginx:
@@ -117,7 +109,7 @@ services:
     expose:
       - "${NGINX_PORT:-8080}"
     networks:
-      - ${DOMAIN_ESCAPED}
+      - default
       - proxy
     labels:
       - traefik.enable=true
@@ -134,8 +126,6 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     image: postgres:${POSTGRES_VERSION:-17.5-alpine}
-    networks:
-      - ${DOMAIN_ESCAPED}
     restart: ${RESTART:-always}
     volumes:
       - ./postgresql:/var/lib/postgresql/data
@@ -144,8 +134,6 @@ services:
     <<: *zammad-service
     container_name: ${DOMAIN_ESCAPED}_zammad-railsserver
     command: ["zammad-railsserver"]
-    networks:
-      - ${DOMAIN_ESCAPED}
 
   ${DOMAIN_ESCAPED}_zammad-redis:
     container_name: ${DOMAIN_ESCAPED}_zammad-redis
@@ -160,18 +148,13 @@ services:
     <<: *zammad-service
     container_name: ${DOMAIN_ESCAPED}_zammad-scheduler
     command: ["zammad-scheduler"]
-    networks:
-      - ${DOMAIN_ESCAPED}
 
   ${DOMAIN_ESCAPED}_zammad-websocket:
     <<: *zammad-service
     container_name: ${DOMAIN_ESCAPED}_zammad-websocket
     command: ["zammad-websocket"]
-    networks:
-      - ${DOMAIN_ESCAPED}
 
 networks:
-  ${DOMAIN_ESCAPED}:
   proxy:
     name: proxy
     external: true

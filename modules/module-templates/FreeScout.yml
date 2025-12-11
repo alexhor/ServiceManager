@@ -9,8 +9,6 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     image: mysql:8.0
-    networks:
-      - ${DOMAIN_ESCAPED}
     restart: always
     volumes:
       - ./mysql:/var/lib/mysql
@@ -29,7 +27,7 @@ services:
       SITE_URL: ${DOMAIN_URL}
     image: tiredofit/freescout:latest
     networks:
-      - ${DOMAIN_ESCAPED}
+      - default
       - proxy
     restart: always
     volumes:
@@ -40,7 +38,6 @@ services:
       - traefik.http.routers.${COMPOSE_PROJECT_NAME}.tls.certresolver=LetsEncrypt
 
 networks:
-  ${DOMAIN_ESCAPED}:
   proxy:
     name: proxy
     external: true
