@@ -12,13 +12,19 @@ import config
 
 
 class Module:
+    """
+    Abstract module base
+    """
     # Location of this module's generated compose file
     composeFile: str
     # The local port exposed by a http server
     exposedPort = None
 
     def __init__(self, subDomain):
-        """An abstract base module
+        """
+        Initiate a new Module instance.
+
+        This creates the directories required for this module, as well as the `.env`-file
 
         Args:
             subDomain (SubDomain): The subdomain this module is installed on
