@@ -9,7 +9,7 @@ services:
       - proxy
     restart: always
     volumes:
-      - ${DOMAIN_PATH}/uptime-kuma:/app/data
+      - ./uptime-kuma:/app/data
     labels:
       - traefik.enable=true
       - traefik.http.services.${DOMAIN_ESCAPED}.loadbalancer.server.port=3001

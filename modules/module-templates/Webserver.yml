@@ -8,8 +8,8 @@ services:
       - proxy
     restart: always
     volumes:
-      - ${DOMAIN_PATH}/php:/var/www/html
-      - ${DOMAIN_PATH}/php.ini:/usr/local/etc/php/conf.d/external.ini
+      - ./php:/var/www/html
+      - ./php.ini:/usr/local/etc/php/conf.d/external.ini
     labels:
       - traefik.enable=true
       - traefik.http.routers.${DOMAIN_ESCAPED}.rule=Host(`${DOMAIN}`)

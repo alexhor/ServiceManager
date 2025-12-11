@@ -13,7 +13,7 @@ services:
       - ${DOMAIN_ESCAPED}
     restart: always
     volumes:
-      - ${DOMAIN_PATH}/postgresql:/var/lib/postgresql/data
+      - ./postgresql:/var/lib/postgresql/data
 
   ${DOMAIN_ESCAPED}_odoo:
     container_name: ${DOMAIN_ESCAPED}_odoo
@@ -36,10 +36,10 @@ services:
     volumes:
       #- /etc/timezone:/etc/timezone:ro
       #- /etc/localtime:/etc/localtime:ro
-      # - ${DOMAIN_PATH}/odoo/entrypoint.sh:/entrypoint.sh   # if you want to install additional Python packages, uncomment this line!
-      - ${DOMAIN_PATH}/odoo/addons:/mnt/extra-addons
-      - ${DOMAIN_PATH}/odoo/etc:/etc/odoo
-      - ${DOMAIN_PATH}/odoo/lib:/var/lib/odoo
+      # - ./odoo/entrypoint.sh:/entrypoint.sh   # if you want to install additional Python packages, uncomment this line!
+      - ./odoo/addons:/mnt/extra-addons
+      - ./odoo/etc:/etc/odoo
+      - ./odoo/lib:/var/lib/odoo
     labels:
       - traefik.enable=true
       - traefik.http.services.${DOMAIN_ESCAPED}.loadbalancer.server.port=8069

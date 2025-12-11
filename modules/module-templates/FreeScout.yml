@@ -13,7 +13,7 @@ services:
       - ${DOMAIN_ESCAPED}
     restart: always
     volumes:
-      - ${DOMAIN_PATH}/mysql:/var/lib/mysql
+      - ./mysql:/var/lib/mysql
 
   ${DOMAIN_ESCAPED}_freescout:
     container_name: ${DOMAIN_ESCAPED}_freescout
@@ -33,7 +33,7 @@ services:
       - proxy
     restart: always
     volumes:
-      - ${DOMAIN_PATH}/data:/data
+      - ./data:/data
     labels:
       - traefik.enable=true
       - traefik.http.routers.${DOMAIN_ESCAPED}.rule=Host(`${DOMAIN}`)

@@ -56,7 +56,7 @@ x-shared:
     image: ${IMAGE_REPO:-ghcr.io/zammad/zammad}:${VERSION:-6.5.0-75}
     restart: ${RESTART:-always}
     volumes:
-      - ${DOMAIN_PATH}/zammad:/opt/zammad/storage
+      - ./zammad:/opt/zammad/storage
     depends_on:
       - ${DOMAIN_ESCAPED}_zammad-memcached
       - ${DOMAIN_ESCAPED}-postgresql
@@ -70,8 +70,8 @@ services:
     networks:
       - ${DOMAIN_ESCAPED}
     volumes:
-      - ${DOMAIN_PATH}/zammad-backup:/var/tmp/zammad
-      - ${DOMAIN_PATH}/zammad:/opt/zammad/storage:ro
+      - ./zammad-backup:/var/tmp/zammad
+      - ./zammad:/opt/zammad/storage:ro
     user: 1000:1000
 
   ${DOMAIN_ESCAPED}_zammad-elasticsearch:
@@ -81,7 +81,7 @@ services:
       - ${DOMAIN_ESCAPED}
     restart: ${RESTART:-always}
     volumes:
-      - ${DOMAIN_PATH}/elasticsearch:/bitnami/elasticsearch/data
+      - ./elasticsearch:/bitnami/elasticsearch/data
     environment:
       # Enable authorization without HTTPS. For external access with
       #   SSL termination, use solutions like nginx-proxy-manager.
@@ -138,7 +138,7 @@ services:
       - ${DOMAIN_ESCAPED}
     restart: ${RESTART:-always}
     volumes:
-      - ${DOMAIN_PATH}/postgresql:/var/lib/postgresql/data
+      - ./postgresql:/var/lib/postgresql/data
 
   ${DOMAIN_ESCAPED}_zammad-railsserver:
     <<: *zammad-service
@@ -154,7 +154,7 @@ services:
       - ${DOMAIN_ESCAPED}
     restart: ${RESTART:-always}
     volumes:
-      - ${DOMAIN_PATH}/redis:/data
+      - ./redis:/data
 
   ${DOMAIN_ESCAPED}_zammad-scheduler:
     <<: *zammad-service
