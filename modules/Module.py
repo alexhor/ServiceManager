@@ -103,7 +103,7 @@ class Module:
         Returns:
             dict: The converted env file
         """
-        return self.fileToDict(self.envFile)
+        return Module.fileToDict(self.envFile)
 
     @staticmethod
     def fileToDict(filePath):
