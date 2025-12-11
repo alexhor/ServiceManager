@@ -12,8 +12,8 @@ import config
 
 
 class Module:
-    # A temporary config file location
-    tmpConfigFile = 'docker-compose.yml'
+    # Location of this module's generated compose file
+    composeFile: str
     # The local port exposed by a http server
     exposedPort = None
 
@@ -26,6 +26,7 @@ class Module:
         self.name = type(self).__name__
         self.subDomain = subDomain
         self.envFile = join(self.subDomain.rootDir, '.env')
+        self.composeFile = join(self.subDomain.rootDir, 'docker-compose.yml')
         self.moduleTemplate = join(dirname(__file__), 'module-templates', self.name + '.yml')
         # Create all required dirs
         for dirName in self.requiredDirs:
@@ -67,7 +68,7 @@ class Module:
 
     def _createEnvFile(self):
         """Put all required parameters into an .env file in the subdomains root directory"""
-        # TODO rename URL & PATH to MODULE_ for future path-prefix modules
+        # TODO rename URL & PATH to MODULE_URL & MODULE_ROOT for future path-prefix modules
         default_vars = {
             'DOMAIN'        : str(self.subDomain),
             'DOMAIN_ESCAPED': self._domain_escaped,
@@ -125,8 +126,8 @@ class Module:
                 envVars[splitLine[0]] = splitLine[1]
         return envVars
 
-    def _prepareTemplateFile(self):
-        """Get a template file and fill in any variables"""
+    def _generateComposeFile(self):
+        """Generate the compose file for this module and save it to the module directory."""
         # Make sure an env file exists
         if not isfile(self.envFile):
             self._createEnvFile()
@@ -141,12 +142,12 @@ class Module:
             configFileContent = configFileContent.replace('${' + key + '}', value)
 
         # Write final config file
-        with open(self.tmpConfigFile, 'w') as configFile:
+        with open(self.composeFile, 'w') as configFile:
             configFile.write(configFileContent)
 
     def up(self):
         """Bring up this modules containers"""
-        self._prepareTemplateFile()
+        self._generateComposeFile()
         # Bring up containers
         self._call_compose('up', '-d')
         # Configure haproxy
@@ -155,7 +156,7 @@ class Module:
 
     def down(self):
         """Stop all running containers"""
-        self._prepareTemplateFile()
+        self._generateComposeFile()
         self._call_compose('down')
         # Configure haproxy
         self.subDomain.haproxyConfig(True)
@@ -196,7 +197,7 @@ class Module:
 
     def getContainers(self) -> list[str]:
         """Get a string list of all containers in this module"""
-        self._prepareTemplateFile()
+        self._generateComposeFile()
         with open(self.moduleTemplate, 'r') as configTemplateFile:
             configFileContent = configTemplateFile.read()
         containerMatches = re.findall(r"\n\s+container_name:\s+(?:\${DOMAIN_ESCAPED})_(.+)\s*\n", configFileContent)
@@ -229,7 +230,7 @@ class Module:
         Execute docker compose with the given arguments.
 
         This function uses the binary specified in config.py,
-        appends --project-directory and the generated -f docker-compose.yml,
+        appends the generated -f docker-compose.yml,
         as well as the -p ${DOMAIN_ESCAPED} project name;
         and then adds whatever arguments were supplied to the function
 
@@ -238,7 +239,8 @@ class Module:
         """
         return call(
             config.docker_compose_command
-            + ['-f', self.tmpConfigFile]
+            + ['-f', self.composeFile,
+               '-p', self._domain_escaped]
             + list(args)
         )
 
