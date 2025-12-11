@@ -35,10 +35,13 @@ class Module:
                 makedirs(folderPath)
                 # Set permissions for docker
                 chown(folderPath, 1000, 1000)
+
+        # Load & Update environment variables on startup
+        self.envVars = self._createOrUpdateEnvFile()
+
         # Get the http port if it exists
-        self.envFileDict = self.envFileToDict()
-        if 'HTTP_PORT' in self.envFileDict.keys():
-            self.exposedPort = self.envFileDict['HTTP_PORT']
+        if 'HTTP_PORT' in self.envVars.keys():
+            self.exposedPort = self.envVars['HTTP_PORT']
 
     def __repr__(self):
         return type(self).__name__
@@ -112,14 +115,6 @@ class Module:
         """
         return dict()
 
-    def envFileToDict(self):
-        """Get a dictionary representation of this modules env file
-
-        Returns:
-            dict: The converted env file
-        """
-        return Module.fileToDict(self.envFile)
-
     @staticmethod
     def fileToDict(filePath):
         """Get a dictionary representation of a file
@@ -143,17 +138,12 @@ class Module:
 
     def _generateComposeFile(self):
         """Generate the compose file for this module and save it to the module directory."""
-        # Make sure an env file exists
-        if not isfile(self.envFile):
-            self._createEnvFile()
-        envVars = self.envFileToDict()
-
         configFileContent = ''
         # Get the config template file
         with open(self.moduleTemplate, 'r') as configTemplateFile:
             configFileContent = configTemplateFile.read()
         # Replace template variables
-        for key, value in envVars.items():
+        for key, value in self.envVars.items():
             configFileContent = configFileContent.replace('${' + key + '}', value)
 
         # Write final config file
