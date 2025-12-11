@@ -172,18 +172,19 @@ class Module:
         self.down()
         self._call_compose('rm', '-v')
         remove(self.envFile)
+        remove(self.composeFile)
         # Delete all required dirs
         for dirName in self.requiredDirs:
             dirPath = join(self.subDomain.rootDir, dirName)
             if isdir(dirPath):
                 rmtree(dirPath)
-        self.save(True)
+        self.save(delete=True)
 
     def isNone(self):
         """States whether this is a proper module or not"""
         return False
 
-    def save(self, delete=False):
+    def save(self, *, delete=False):
         """Save this module to the current subdomain
 
         Args:
