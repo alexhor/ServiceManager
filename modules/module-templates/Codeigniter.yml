@@ -34,8 +34,8 @@ services:
       - ./php.ini:/usr/local/etc/php/conf.d/external.ini
     labels:
       - traefik.enable=true
-      - traefik.http.routers.${DOMAIN_ESCAPED}.rule=Host(`${DOMAIN}`)
-      - traefik.http.routers.${DOMAIN_ESCAPED}.tls.certresolver=LetsEncrypt
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.rule=Host(`${DOMAIN}`)
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.tls.certresolver=LetsEncrypt
 
 networks:
   ${DOMAIN_ESCAPED}:
