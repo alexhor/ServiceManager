@@ -8,6 +8,7 @@ class Proxy:
 
 
 used_proxy: Proxy = Proxy.traefik
+proxy_network_name = 'proxy'
 handle_ssl_certificates: bool = False
 
 docker_compose_command: list[str] = ["docker", "compose"]

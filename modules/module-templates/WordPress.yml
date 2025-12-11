@@ -33,5 +33,5 @@ services:
       - traefik.http.routers.${COMPOSE_PROJECT_NAME}.tls.certresolver=LetsEncrypt
 networks:
   proxy:
-    name: proxy
+    name: ${PROXY_NETWORK_NAME}
     external: true

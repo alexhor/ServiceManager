@@ -16,5 +16,5 @@ services:
 
 networks:
   proxy:
-    name: proxy
+    name: ${PROXY_NETWORK_NAME}
     external: true

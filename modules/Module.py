@@ -81,7 +81,8 @@ class Module:
             'DOMAIN_ESCAPED'      : self._domain_escaped,
             'DOMAIN_URL'          : 'https://' + str(self.subDomain),
             'DOMAIN_PATH'         : self.subDomain.rootDir,
-            'COMPOSE_PROJECT_NAME': '${DOMAIN_ESCAPED}'
+            'COMPOSE_PROJECT_NAME': '${DOMAIN_ESCAPED}',
+            'PROXY_NETWORK_NAME'  : config.proxy_network_name,
         }
         # Keys in the latter dictionary take precedence -> subclass method can override default variables
         combined_vars = default_vars | self._getCustomEnvVars()
