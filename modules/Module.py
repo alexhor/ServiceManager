@@ -70,7 +70,7 @@ class Module:
         # TODO rename URL & PATH to MODULE_ for future path-prefix modules
         default_vars = {
             'DOMAIN'        : str(self.subDomain),
-            'DOMAIN_ESCAPED': str(self.subDomain).replace('.', '-'),
+            'DOMAIN_ESCAPED': self._domain_escaped,
             'DOMAIN_URL'    : 'https://' + str(self.subDomain),
             'DOMAIN_PATH'   : self.subDomain.rootDir,
         }
@@ -131,6 +131,7 @@ class Module:
         if not isfile(self.envFile):
             self._createEnvFile()
         envVars = self.envFileToDict()
+
         configFileContent = ''
         # Get the config template file
         with open(self.moduleTemplate, 'r') as configTemplateFile:
@@ -138,6 +139,7 @@ class Module:
         # Replace template variables
         for key, value in envVars.items():
             configFileContent = configFileContent.replace('${' + key + '}', value)
+
         # Write final config file
         with open(self.tmpConfigFile, 'w') as configFile:
             configFile.write(configFileContent)
@@ -204,8 +206,7 @@ class Module:
         if containerName not in self.getContainers():
             print('Invalid container name')
             return
-        envVars = self.envFileToDict()
-        fullContainerName = envVars['DOMAIN_ESCAPED'] + '_' + containerName
+        fullContainerName = self._domain_escaped + '_' + containerName
         try:
             call(['docker', 'logs', '-f', fullContainerName])
         except KeyboardInterrupt:
@@ -216,8 +217,7 @@ class Module:
         if containerName not in self.getContainers():
             print('Invalid container name')
             return
-        envVars = self.envFileToDict()
-        fullContainerName = envVars['DOMAIN_ESCAPED'] + '_' + containerName
+        fullContainerName = self._domain_escaped + '_' + containerName
         try:
             call(['docker', 'exec', '-it', fullContainerName, command])
         except KeyboardInterrupt:
@@ -241,3 +241,8 @@ class Module:
             + ['-f', self.tmpConfigFile]
             + list(args)
         )
+
+    @property
+    def _domain_escaped(self) -> str:
+        """Escaped subdomain name"""
+        return str(self.subDomain).replace('.', '-')
