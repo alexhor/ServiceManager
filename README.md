@@ -3,6 +3,13 @@ Manage web services with docker-compose and haproxy
 
 Warning: This programm is under heavy development and probably not very stable
 
+## IMPORTANT: Update to v2.0
+The new update makes use of `docker compose` for a lot of the name generating & variable expansion.
+Therefore containers started by old versions of this manager will not be recognized by the new one.
+
+To update, simply run `module down` for every subdomain **from the old version**,
+then perform the upgrade and run `module up` for every subdomain.  
+
 ## Usage
 Start the command line interface
 ```
