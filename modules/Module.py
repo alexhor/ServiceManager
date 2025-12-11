@@ -3,7 +3,7 @@ import re
 import secrets
 import string
 from os import chown, makedirs, remove
-from os.path import exists, isfile, isdir, join
+from os.path import exists, isfile, isdir, join, dirname
 from shutil import rmtree
 from socketserver import TCPServer
 from subprocess import call
@@ -26,7 +26,7 @@ class Module:
         self.name = type(self).__name__
         self.subDomain = subDomain
         self.envFile = join(self.subDomain.rootDir, '.env')
-        self.moduleTemplate = join('modules', 'module-templates', self.name + '.yml')
+        self.moduleTemplate = join(dirname(__file__), 'module-templates', self.name + '.yml')
         # Create all required dirs
         for dirName in self.requiredDirs:
             folderPath = join(self.subDomain.rootDir, dirName)
@@ -67,7 +67,7 @@ class Module:
 
     def _createEnvFile(self):
         """Put all required parameters into an .env file in the subdomains root directory"""
-        # TODO rename URL & PATH to MODULE_
+        # TODO rename URL & PATH to MODULE_ for future path-prefix modules
         default_vars = {
             'DOMAIN'        : str(self.subDomain),
             'DOMAIN_ESCAPED': str(self.subDomain).replace('.', '-'),
