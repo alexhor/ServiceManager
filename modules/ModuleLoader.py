@@ -11,6 +11,7 @@ from .Mumble import Mumble
 from .Nextcloud import Nextcloud
 from .NoneModule import NoneModule
 from .Odoo import Odoo
+from .Registry import Registry
 from .UptimeKuma import UptimeKuma
 from .Webserver import Webserver
 from .WordPress import WordPress
@@ -26,6 +27,7 @@ class ModuleLoader:
         'Mumble'     : Mumble,
         'Nextcloud'  : Nextcloud,
         'Odoo'       : Odoo,
+        'Registry'   : Registry,
         'UptimeKuma' : UptimeKuma,
         'Webserver'  : Webserver,
         'WordPress'  : WordPress,
