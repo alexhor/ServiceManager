@@ -12,7 +12,7 @@ services:
     volumes:
       - ./mysql:/var/lib/mysql
   wordpress:
-    image: wordpress:latest
+    image: cr.immanuel-online.de/wordpress:latest
     depends_on:
       - db
     environment:
@@ -31,6 +31,10 @@ services:
       - traefik.enable=true
       - traefik.http.routers.${COMPOSE_PROJECT_NAME}.rule=Host(`${DOMAIN}`)
       - traefik.http.routers.${COMPOSE_PROJECT_NAME}.tls.certresolver=LetsEncrypt
+  memcached:
+    image: memcached
+    restart: always
+
 networks:
   proxy:
     name: ${PROXY_NETWORK_NAME}
