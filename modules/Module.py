@@ -256,7 +256,7 @@ class Module:
         Args:
             *args (str): Compose command to execute
         """
-        return config.docker_compose_command + ['-f', self.composeFile] + list(args)
+        return config.docker_compose_command + ['--project-directory', self.subDomain.rootDir] + list(args)
 
     @property
     def _domain_escaped(self) -> str:
