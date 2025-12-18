@@ -14,7 +14,7 @@ services:
       PHP_MEMORY_LIMIT: 512M
       UPLOAD_MAX_FILESIZE: 16M
     volumes:
-      - ./src:/htdocs
+      - data:/htdocs
     labels:
       - traefik.enable=true
       - 'traefik.http.routers.${COMPOSE_PROJECT_NAME}.rule=Host(`${DOMAIN}`)'
@@ -24,3 +24,12 @@ networks:
   proxy:
     name: ${PROXY_NETWORK_NAME}
     external: true
+
+# Needs this setup to populate the directory with content from the image on first startup
+volumes:
+  data:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: "${DOMAIN_PATH}/src"
