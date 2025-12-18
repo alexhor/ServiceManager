@@ -2,7 +2,7 @@
 import secrets
 import shutil
 import string
-from os import chown, makedirs, remove
+from os import makedirs, remove
 from os.path import exists, isfile, isdir, join, dirname
 from shutil import rmtree
 from socketserver import TCPServer
@@ -39,8 +39,6 @@ class Module:
             folderPath = join(self.subDomain.rootDir, dirName)
             if not exists(folderPath):
                 makedirs(folderPath)
-                # Set permissions for docker
-                chown(folderPath, 1000, 1000)
 
         # Load & Update environment variables on startup
         self.envVars = self._createOrUpdateEnvFile()
