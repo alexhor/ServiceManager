@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 
 from abc import ABC, abstractmethod
-from typing import Any
 from typing import Generator
+
 from prompt_toolkit.completion import Completion
 
 from ServiceManager import ServiceManager
@@ -10,7 +10,7 @@ from modules.ModuleLoader import ModuleLoader
 
 
 class Command:
-    def __init__(self, command: str, aliasList: list[str]=[], subcommandList: list['Command']=[], argList: list['Argument']=[]):
+    def __init__(self, command: str, aliasList: list[str] = [], subcommandList: list['Command'] = [], argList: list['Argument'] = []):
         self._command: str = command
         self.__aliasList: list[str] = aliasList
         self._subcommandList: list[Command] = subcommandList
@@ -50,9 +50,6 @@ class Command:
         if argument in self._argList:
             return
         self._argList.append(argument)
-    
-
-
 
 
 class Argument(ABC):
@@ -63,11 +60,13 @@ class Argument(ABC):
     def yieldCompletion(self, firstLevelText: str) -> Generator[Completion, None, None]:
         pass
 
+
 class ArgumentDomain(Argument):
     def yieldCompletion(self, text: str) -> Generator[Completion, None, None]:
         for domain in self._serviceManager.domains.values():
             if domain.name.startswith(text):
-                yield Completion(domain.name, start_position=-1*len(text))
+                yield Completion(domain.name, start_position=-1 * len(text))
+
 
 class ArgumentSubDomain(Argument):
     def yieldCompletion(self, text: str) -> Generator[Completion, None, None]:
@@ -76,7 +75,8 @@ class ArgumentSubDomain(Argument):
         else:
             for subdomain in self._serviceManager.currentDomain.loadSubDomains().values():
                 if subdomain.subName.startswith(text):
-                    yield Completion(subdomain.subName, start_position=-1*len(text), display=subdomain.name)
+                    yield Completion(subdomain.subName, start_position=-1 * len(text), display=subdomain.name)
+
 
 class ArgumentModule(Argument):
     def yieldCompletion(self, text: str) -> Generator[Completion, None, None]:
@@ -85,7 +85,8 @@ class ArgumentModule(Argument):
         else:
             for module in ModuleLoader.availableModules:
                 if module.startswith(text):
-                    yield Completion(module, start_position=-1*len(text))
+                    yield Completion(module, start_position=-1 * len(text))
+
 
 class ArgumentContainer(Argument):
     def yieldCompletion(self, text: str) -> Generator[Completion, None, None]:
@@ -94,4 +95,4 @@ class ArgumentContainer(Argument):
         else:
             for containerName in self._serviceManager.currentSubDomain.activeModule.getContainers():
                 if containerName.startswith(text):
-                    yield Completion(containerName, start_position=-1*len(text))
+                    yield Completion(containerName, start_position=-1 * len(text))

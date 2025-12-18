@@ -2,37 +2,38 @@
 
 from os.path import isfile, join
 
-from .NoneModule import NoneModule
-from .Module import Module
-from .Webserver import Webserver
-from .WordPress import WordPress
-from .Nextcloud import Nextcloud
-from .Zammad import Zammad
-from .Odoo import Odoo
-from .UptimeKuma import UptimeKuma
-from .FreeScout import FreeScout
-from .Mumble import Mumble
 from .Codeigniter import Codeigniter
 from .Collabora import Collabora
+from .FreeScout import FreeScout
+from .Module import Module
+from .Mumble import Mumble
+from .Nextcloud import Nextcloud
+from .NoneModule import NoneModule
+from .Odoo import Odoo
+from .UptimeKuma import UptimeKuma
+from .Webserver import Webserver
+from .WordPress import WordPress
+from .Zammad import Zammad
+
 
 class ModuleLoader:
     availableModules = {
-        'Webserver'  :   Webserver,
-        'WordPress'  :   WordPress,
-        'Nextcloud'  :   Nextcloud,
-        'Zammad'     :   Zammad,
-        'Odoo'       :   Odoo,
-        'UptimeKuma' :   UptimeKuma,
-        'FreeScout'  :   FreeScout,
-        'Mumble'     :   Mumble,
-        'Codeigniter':  Codeigniter,
-        'Collabora'  :  Collabora,
+        'Codeigniter': Codeigniter,
+        'Collabora'  : Collabora,
+        'FreeScout'  : FreeScout,
+        'Mumble'     : Mumble,
+        'Nextcloud'  : Nextcloud,
+        'Odoo'       : Odoo,
+        'UptimeKuma' : UptimeKuma,
+        'Webserver'  : Webserver,
+        'WordPress'  : WordPress,
+        'Zammad'     : Zammad,
     }
 
     @staticmethod
     def fileToDict(filePath):
         """Get a dictionary representation of a file
-        
+
         Args:
             filePath (string): Path to the file to convert
         Returns:
@@ -53,7 +54,7 @@ class ModuleLoader:
     @staticmethod
     def load(subDomain) -> Module:
         """Load a module for the given subdomain, if one exists
-        
+
         Args:
             subDomain (SubDomain): The subDomain to load the module for
         """
@@ -68,11 +69,11 @@ class ModuleLoader:
     @staticmethod
     def new(moduleName, subDomain):
         """Create a new module of the given type
-        
+
         Args:
             moduleName (string): Name of the module type to create a new instance of
             subDomain (SubDomain): The subDomain to create the module for
-        
+
         Returns:
             Module: The created module
         """

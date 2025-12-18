@@ -1,12 +1,12 @@
 #!/usr/bin/python3
 
 from os import makedirs
-from os.path import isfile, isdir
-from subprocess import run
+from os.path import isdir
+
 from distutils.dir_util import copy_tree
 
-from .MySql import MySql
 from .Module import Module
+from .MySql import MySql
 
 
 class Webserver(MySql, Module):
@@ -18,13 +18,6 @@ class Webserver(MySql, Module):
         """
         self.requiredDirs = ['php']
         super().__init__(subDomain)
-
-    def _createEnvFile(self):
-        """Put all requried parameters into an .env file in the subdomains root directory"""
-        self.exposedPort = self.getFreePort()
-        with open(self.envFile, 'w') as envFile:
-            envFile.write('DOMAIN=' + str(self.subDomain) + '\n')
-            envFile.write('DOMAIN_ESCAPED=' + str(self.subDomain).replace('.', '-') + '\n')
 
     def copyData(self, dataDir, webDir='httpdocs'):
         """Import a web directory

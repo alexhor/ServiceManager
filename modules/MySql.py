@@ -7,7 +7,7 @@ from subprocess import run
 class MySql:
     def importDb(self, dbLocation):
         """Import an sql dump
-        
+
         Args:
             dbLocation (string): Location of an sql file
         """
@@ -18,4 +18,3 @@ class MySql:
     def mysqlAccess(self):
         """Get a mysql command prompt in the mysql container"""
         run('docker exec -it ' + self.envFileDict['DOMAIN_ESCAPED'] + '_mysql mysql -uroot -p' + self.envFileDict['MYSQL_ROOT_PASSWORD'], shell=True)
-

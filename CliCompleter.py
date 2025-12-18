@@ -1,4 +1,5 @@
 from typing import Generator
+
 from prompt_toolkit.completion import Completer, Completion
 
 from Command import ArgumentContainer, ArgumentModule, Command, ArgumentDomain, ArgumentSubDomain
@@ -8,7 +9,7 @@ class CliCompleter(Completer):
     def __init__(self, service_manager):
         self._service_manager = service_manager
 
-        self._commands: tuple[Command] = (
+        self._commands: tuple[Command, ...] = (
             Command("domain", ["dm"], [
                 Command("get", ["current"]),
                 Command("list", ["ls"]),
@@ -53,10 +54,10 @@ class CliCompleter(Completer):
                     firstLevelCommand = cmd
             else:
                 if cmd.command.startswith(firstLevelText):
-                    yield Completion(cmd.command, start_position=-1*len(firstLevelText))
+                    yield Completion(cmd.command, start_position=-1 * len(firstLevelText))
                 for alias in cmd.aliasList:
                     if alias.startswith(firstLevelText):
-                        yield Completion(alias, start_position=-1*len(firstLevelText))
+                        yield Completion(alias, start_position=-1 * len(firstLevelText))
 
         if 0 < len(textSplit):
             if None is not firstLevelCommand:
