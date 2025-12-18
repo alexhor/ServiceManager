@@ -2,7 +2,7 @@
 # docker-compose file for a WordPress installation
 services:
   db:
-    image: mysql:9
+    image: mysql:lts
     environment:
       MYSQL_DATABASE: wordpress
       MYSQL_USER: wordpress

@@ -2,7 +2,7 @@
 import secrets
 import shutil
 import string
-from os import chown, makedirs, remove
+from os import makedirs, remove
 from os.path import exists, isfile, isdir, join, dirname
 from shutil import rmtree
 from socketserver import TCPServer
@@ -12,13 +12,19 @@ import config
 
 
 class Module:
+    """
+    Abstract module base
+    """
     # Location of this module's generated compose file
     composeFile: str
     # The local port exposed by a http server
     exposedPort = None
 
     def __init__(self, subDomain):
-        """An abstract base module
+        """
+        Initiate a new Module instance.
+
+        This creates the directories required for this module, as well as the `.env`-file
 
         Args:
             subDomain (SubDomain): The subdomain this module is installed on
@@ -33,8 +39,6 @@ class Module:
             folderPath = join(self.subDomain.rootDir, dirName)
             if not exists(folderPath):
                 makedirs(folderPath)
-                # Set permissions for docker
-                chown(folderPath, 1000, 1000)
 
         # Load & Update environment variables on startup
         self.envVars = self._createOrUpdateEnvFile()
@@ -250,7 +254,7 @@ class Module:
         Args:
             *args (str): Compose command to execute
         """
-        return config.docker_compose_command + ['-f', self.composeFile] + list(args)
+        return config.docker_compose_command + ['--project-directory', self.subDomain.rootDir] + list(args)
 
     @property
     def _domain_escaped(self) -> str:

@@ -1,11 +1,9 @@
 #!/usr/bin/python3
 
 from .Module import Module
-from .MySql import MySql
-from .Webserver import Webserver
 
 
-class FreeScout(Webserver, MySql, Module):
+class FreeScout(Module):
     def __init__(self, subDomain):
         """A FreeScout installation
 

@@ -1,11 +1,9 @@
 #!/usr/bin/python3
 
 from .Module import Module
-from .MySql import MySql
-from .Webserver import Webserver
 
 
-class WordPress(Webserver, MySql, Module):
+class WordPress(Module):
     def __init__(self, subDomain):
         """A WordPress installation
 

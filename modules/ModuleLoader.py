@@ -5,14 +5,17 @@ from os.path import join
 from .Codeigniter import Codeigniter
 from .Collabora import Collabora
 from .FreeScout import FreeScout
+from .LinkStack import LinkStack
 from .Module import Module
 from .Mumble import Mumble
 from .Nextcloud import Nextcloud
 from .NoneModule import NoneModule
 from .Odoo import Odoo
+from .Registry import Registry
 from .UptimeKuma import UptimeKuma
 from .Webserver import Webserver
 from .WordPress import WordPress
+from .Yopass import Yopass
 from .Zammad import Zammad
 
 
@@ -21,12 +24,15 @@ class ModuleLoader:
         'Codeigniter': Codeigniter,
         'Collabora'  : Collabora,
         'FreeScout'  : FreeScout,
+        'LinkStack'  : LinkStack,
         'Mumble'     : Mumble,
         'Nextcloud'  : Nextcloud,
         'Odoo'       : Odoo,
+        'Registry'   : Registry,
         'UptimeKuma' : UptimeKuma,
         'Webserver'  : Webserver,
         'WordPress'  : WordPress,
+        'Yopass'     : Yopass,
         'Zammad'     : Zammad,
     }
 
@@ -39,7 +45,8 @@ class ModuleLoader:
         """
         moduleSettings = Module.fileToDict(join(subDomain.rootDir, '.module'))
         # If the module doesn't exist, return a dummy one
-        if 'MODULE_NAME' not in moduleSettings.keys() or moduleSettings['MODULE_NAME'] not in ModuleLoader.availableModules.keys():
+        if 'MODULE_NAME' not in moduleSettings.keys() or \
+                moduleSettings['MODULE_NAME'] not in ModuleLoader.availableModules.keys():
             return NoneModule(subDomain)
         # Otherwise load the module
         else:

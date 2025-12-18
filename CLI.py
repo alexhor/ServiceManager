@@ -175,6 +175,7 @@ class CLI:
                 elif 3 == len(commandParts):
                     module = ModuleLoader.new(commandParts[2], self._service_manager.currentSubDomain)
                     self._service_manager.currentSubDomain.addModule(module)
+                    module.save()
                     print("Module", commandParts[2], "added")
                     return
             # TODO: add a command to show container logs

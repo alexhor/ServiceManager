@@ -1,0 +1,34 @@
+services:
+  registry:
+    image: registry
+    networks:
+      - proxy
+    restart: always
+    environment:
+      REGISTRY_AUTH: htpasswd
+      REGISTRY_AUTH_HTPASSWD_PATH: /htpasswd
+      REGISTRY_AUTH_HTPASSWD_REALM: "Registry Auth"
+      OTEL_TRACES_EXPORTER: "none"
+      REGISTRY_LOG_LEVEL: info
+      REGISTRY_LOG_FIELDS_ENVIRONMENT: production
+    volumes:
+      - ./registry:/var/lib/registry
+      - ./htpasswd:/htpasswd:ro
+    labels:
+      - traefik.enable=true
+      - 'traefik.http.routers.${COMPOSE_PROJECT_NAME}.rule=Host(`${DOMAIN}`)'
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.tls.certresolver=LetsEncrypt
+
+  builder:
+    extends:
+      file: builder/docker-compose.yml
+      service: builder
+    environment:
+      REGISTRY_HOST: "${DOMAIN}"
+      REGISTRY_USER: "${REGISTRY_BUILDER_USER}"
+      REGISTRY_PASS: "${REGISTRY_BUILDER_PASS}"
+
+networks:
+  proxy:
+    name: ${PROXY_NETWORK_NAME}
+    external: true

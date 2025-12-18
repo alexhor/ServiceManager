@@ -1,0 +1,25 @@
+services:
+  memcached:
+    image: memcached
+    restart: always
+
+  yopass:
+    image: jhaals/yopass
+    restart: always
+    command:
+      - "--memcached=memcached:11211"
+    networks:
+      - default
+      - proxy
+    expose:
+      # Hint to traefik which port to use
+      - "1337"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.rule=Host(`${DOMAIN}`)
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.tls.certresolver=LetsEncrypt
+
+networks:
+  proxy:
+    name: ${PROXY_NETWORK_NAME}
+    external: true

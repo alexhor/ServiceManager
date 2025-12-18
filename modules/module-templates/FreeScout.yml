@@ -2,12 +2,12 @@
 # docker-compose file for a FreeScout installation
 services:
   db:
-    image: mysql:8.0
+    image: mariadb
     environment:
-      MYSQL_DATABASE: freescout
-      MYSQL_USER: freescout
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MARIADB_DATABASE: freescout
+      MARIADB_USER: freescout
+      MARIADB_PASSWORD: ${MYSQL_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     restart: always
     volumes:
       - ./mysql:/var/lib/mysql

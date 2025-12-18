@@ -1,7 +1,8 @@
 #!/usr/bin/python3
 
 from os import makedirs
-from os.path import isdir
+from os.path import isdir, join
+from pathlib import Path
 
 from distutils.dir_util import copy_tree
 
@@ -18,6 +19,12 @@ class Webserver(MySql, Module):
         """
         self.requiredDirs = ['php']
         super().__init__(subDomain)
+
+    def up(self):
+        # Create php.ini file - otherwise, docker compose will make the mount a directory
+        Path(join(self.subDomain.rootDir, 'php.ini')).touch()
+        # Call super
+        super().up()
 
     def copyData(self, dataDir, webDir='httpdocs'):
         """Import a web directory
