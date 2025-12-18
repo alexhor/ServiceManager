@@ -9,6 +9,7 @@ class LinkStack(Module):
 
     LinkStack is an alternative to LinkTree.
     """
+
     def __init__(self, subDomain):
         self.requiredDirs = ['src']
         super().__init__(subDomain)
@@ -17,4 +18,5 @@ class LinkStack(Module):
         self.exposedPort = self.getFreePort()
         return {
             'ADMIN_EMAIL': str(self.exposedPort),
+            'TIMEZONE'   : 'Europe/Berlin'
         }
