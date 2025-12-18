@@ -17,6 +17,6 @@ class LinkStack(Module):
     def _getCustomEnvVars(self) -> dict[str, str]:
         self.exposedPort = self.getFreePort()
         return {
-            'ADMIN_EMAIL': str(self.exposedPort),
+            'ADMIN_EMAIL': 'invalid@example.com',
             'TIMEZONE'   : 'Europe/Berlin'
         }
