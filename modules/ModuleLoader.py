@@ -15,6 +15,7 @@ from .Registry import Registry
 from .UptimeKuma import UptimeKuma
 from .Webserver import Webserver
 from .WordPress import WordPress
+from .Yopass import Yopass
 from .Zammad import Zammad
 
 
@@ -31,6 +32,7 @@ class ModuleLoader:
         'UptimeKuma' : UptimeKuma,
         'Webserver'  : Webserver,
         'WordPress'  : WordPress,
+        'Yopass'     : Yopass,
         'Zammad'     : Zammad,
     }
 
@@ -44,7 +46,7 @@ class ModuleLoader:
         moduleSettings = Module.fileToDict(join(subDomain.rootDir, '.module'))
         # If the module doesn't exist, return a dummy one
         if 'MODULE_NAME' not in moduleSettings.keys() or \
-            moduleSettings['MODULE_NAME'] not in ModuleLoader.availableModules.keys():
+                moduleSettings['MODULE_NAME'] not in ModuleLoader.availableModules.keys():
             return NoneModule(subDomain)
         # Otherwise load the module
         else:
