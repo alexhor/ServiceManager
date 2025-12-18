@@ -1,19 +1,19 @@
 #!/usr/bin/python3
-import re
 import secrets
+import shutil
 import string
 from os import chown, makedirs, remove
 from os.path import exists, isfile, isdir, join, dirname
 from shutil import rmtree
 from socketserver import TCPServer
-from subprocess import call
+from subprocess import call, run, CompletedProcess
 
 import config
 
 
 class Module:
-    # A temporary config file location
-    tmpConfigFile = 'docker-compose.yml'
+    # Location of this module's generated compose file
+    composeFile: str
     # The local port exposed by a http server
     exposedPort = None
 
@@ -26,6 +26,7 @@ class Module:
         self.name = type(self).__name__
         self.subDomain = subDomain
         self.envFile = join(self.subDomain.rootDir, '.env')
+        self.composeFile = join(self.subDomain.rootDir, 'docker-compose.yml')
         self.moduleTemplate = join(dirname(__file__), 'module-templates', self.name + '.yml')
         # Create all required dirs
         for dirName in self.requiredDirs:
@@ -34,10 +35,13 @@ class Module:
                 makedirs(folderPath)
                 # Set permissions for docker
                 chown(folderPath, 1000, 1000)
+
+        # Load & Update environment variables on startup
+        self.envVars = self._createOrUpdateEnvFile()
+
         # Get the http port if it exists
-        self.envFileDict = self.envFileToDict()
-        if 'HTTP_PORT' in self.envFileDict.keys():
-            self.exposedPort = self.envFileDict['HTTP_PORT']
+        if 'HTTP_PORT' in self.envVars.keys():
+            self.exposedPort = self.envVars['HTTP_PORT']
 
     def __repr__(self):
         return type(self).__name__
@@ -65,17 +69,34 @@ class Module:
         with TCPServer(('localhost', 0), None) as s:
             return s.server_address[1]
 
-    def _createEnvFile(self):
-        """Put all required parameters into an .env file in the subdomains root directory"""
-        # TODO rename URL & PATH to MODULE_ for future path-prefix modules
+    def _createOrUpdateEnvFile(self) -> dict[str, str]:
+        """Put all required parameters into an .env file in the subdomains root directory, adding new values if unset
+
+        Returns:
+            dict[str, str]: The variables committed to file
+        """
+        # TODO rename URL & PATH to MODULE_URL & MODULE_ROOT for future path-prefix modules
         default_vars = {
-            'DOMAIN'        : str(self.subDomain),
-            'DOMAIN_ESCAPED': str(self.subDomain).replace('.', '-'),
-            'DOMAIN_URL'    : 'https://' + str(self.subDomain),
-            'DOMAIN_PATH'   : self.subDomain.rootDir,
+            'DOMAIN'              : str(self.subDomain),
+            'DOMAIN_ESCAPED'      : self._domain_escaped,
+            'DOMAIN_URL'          : 'https://' + str(self.subDomain),
+            'DOMAIN_PATH'         : self.subDomain.rootDir,
+            'COMPOSE_PROJECT_NAME': '${DOMAIN_ESCAPED}',
+            'PROXY_NETWORK_NAME'  : config.proxy_network_name,
         }
+        # Keys in the latter dictionary take precedence -> subclass method can override default variables
+        combined_vars = default_vars | self._getCustomEnvVars()
+
+        # If file already exists, update new values only
+        if isfile(self.envFile):
+            # Same precedence applies -> values from file take precedence
+            combined_vars = combined_vars | Module.fileToDict(self.envFile)
+
+        # Save combined variables to file
         with open(self.envFile, 'w') as envFile:
-            envFile.writelines(f'{name}={value}\n' for (name, value) in (default_vars | self._getCustomEnvVars()).items())
+            envFile.writelines(f'{name}={value}\n' for (name, value) in combined_vars.items())
+
+        return combined_vars
 
     def _getCustomEnvVars(self) -> dict[str, str]:
         """
@@ -95,14 +116,6 @@ class Module:
 
         """
         return dict()
-
-    def envFileToDict(self):
-        """Get a dictionary representation of this modules env file
-
-        Returns:
-            dict: The converted env file
-        """
-        return self.fileToDict(self.envFile)
 
     @staticmethod
     def fileToDict(filePath):
@@ -125,26 +138,14 @@ class Module:
                 envVars[splitLine[0]] = splitLine[1]
         return envVars
 
-    def _prepareTemplateFile(self):
-        """Get a template file and fill in any variables"""
-        # Make sure an env file exists
-        if not isfile(self.envFile):
-            self._createEnvFile()
-        envVars = self.envFileToDict()
-        configFileContent = ''
-        # Get the config template file
-        with open(self.moduleTemplate, 'r') as configTemplateFile:
-            configFileContent = configTemplateFile.read()
-        # Replace template variables
-        for key, value in envVars.items():
-            configFileContent = configFileContent.replace('${' + key + '}', value)
-        # Write final config file
-        with open(self.tmpConfigFile, 'w') as configFile:
-            configFile.write(configFileContent)
+    def _generateComposeFile(self):
+        """Generate the compose file for this module and save it to the module directory."""
+        # Since there are no moving parts in the templates, a simple copy is sufficient
+        shutil.copy(self.moduleTemplate, self.composeFile)
 
     def up(self):
         """Bring up this modules containers"""
-        self._prepareTemplateFile()
+        self._generateComposeFile()
         # Bring up containers
         self._call_compose('up', '-d')
         # Configure haproxy
@@ -153,7 +154,7 @@ class Module:
 
     def down(self):
         """Stop all running containers"""
-        self._prepareTemplateFile()
+        self._generateComposeFile()
         self._call_compose('down')
         # Configure haproxy
         self.subDomain.haproxyConfig(True)
@@ -162,24 +163,21 @@ class Module:
     def clean(self):
         """Delete all existing data"""
         self.down()
-        self._call_compose('rm')
+        self._call_compose('rm', '-v')
         remove(self.envFile)
+        remove(self.composeFile)
         # Delete all required dirs
         for dirName in self.requiredDirs:
             dirPath = join(self.subDomain.rootDir, dirName)
             if isdir(dirPath):
                 rmtree(dirPath)
-        self.save(True)
+        self.save(delete=True)
 
     def isNone(self):
-        """States whether this is a proper module or not
-
-        Returns:
-            bool: Whether this is a proper module or not
-        """
+        """States whether this is a proper module or not"""
         return False
 
-    def save(self, delete=False):
+    def save(self, *, delete=False):
         """Save this module to the current subdomain
 
         Args:
@@ -193,51 +191,68 @@ class Module:
                 file.write('MODULE_NAME=' + self.name + '\n')
 
     def getContainers(self) -> list[str]:
-        """Get a string list of all containers in this module"""
-        self._prepareTemplateFile()
-        with open(self.moduleTemplate, 'r') as configTemplateFile:
-            configFileContent = configTemplateFile.read()
-        containerMatches = re.findall(r"\n\s+container_name:\s+(?:\${DOMAIN_ESCAPED})_(.+)\s*\n", configFileContent)
-        return containerMatches
+        """Get a string list of all running containers in this module"""
+        self._generateComposeFile()
+        out_services: str = self._run_compose('ps', '--services').stdout
+        return out_services.splitlines()
 
     def showContainerLogs(self, containerName):
         if containerName not in self.getContainers():
-            print('Invalid container name')
+            print('Invalid service name')
             return
-        envVars = self.envFileToDict()
-        fullContainerName = envVars['DOMAIN_ESCAPED'] + '_' + containerName
         try:
-            call(['docker', 'logs', '-f', fullContainerName])
+            self._call_compose('logs', '-f', containerName)
         except KeyboardInterrupt:
             print()
             print('Log output ended')
 
-    def runContainerCmd(self, containerName, command="/bin/bash"):
+    def runContainerCmd(self, containerName, cmd_binary="/bin/bash", *args):
         if containerName not in self.getContainers():
-            print('Invalid container name')
+            print('Invalid service name')
             return
-        envVars = self.envFileToDict()
-        fullContainerName = envVars['DOMAIN_ESCAPED'] + '_' + containerName
         try:
-            call(['docker', 'exec', '-it', fullContainerName, command])
+            self._call_compose('exec', '-it', containerName, cmd_binary, *args)
         except KeyboardInterrupt:
             print()
             print('Container command ended')
 
-    def _call_compose(self, *args):
+    def _call_compose(self, *args) -> int:
         """
         Execute docker compose with the given arguments.
 
-        This function uses the binary specified in config.py,
-        appends --project-directory and the generated -f docker-compose.yml,
-        as well as the -p ${DOMAIN_ESCAPED} project name;
-        and then adds whatever arguments were supplied to the function
+        Args:
+            *args (str): Compose command to execute. Passed to `_compile_compose_args`
+
+        Returns:
+            int: Exit code of the subprocess
+        """
+        return call(self._compile_compose_args(*args))
+
+    def _run_compose(self, *args) -> CompletedProcess:
+        """
+        Execute docker compose with the given arguments, capturing text _(i.e. encoded)_ output
+
+        Args:
+            *args (str): Compose command to execute. Passed to `_compile_compose_args`
+
+        Returns:
+            CompletedProcess: Exit code of the subprocess
+        """
+        return run(self._compile_compose_args(*args), capture_output=True, text=True)
+
+    def _compile_compose_args(self, *args) -> list[str]:
+        """
+        Compile arguments for a `docker compose` call into a single list for e.g. `subprocess.call`.
+
+        This function takes the argument list specified in config.py,
+        appends the generated `-f docker-compose.yml` and then all parameters passes to this function.
 
         Args:
             *args (str): Compose command to execute
         """
-        return call(
-            config.docker_compose_command
-            + ['-f', self.tmpConfigFile]
-            + list(args)
-        )
+        return config.docker_compose_command + ['-f', self.composeFile] + list(args)
+
+    @property
+    def _domain_escaped(self) -> str:
+        """Escaped subdomain name"""
+        return str(self.subDomain).replace('.', '-')

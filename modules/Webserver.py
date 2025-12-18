@@ -26,8 +26,8 @@ class Webserver(MySql, Module):
             dataDir (string): Location of the data to import
             webDir (string): The webservers data directory in the subdomain folder
         """
-        if not isdir(dataDir) or 'DOMAIN_PATH' not in self.envFileDict.keys():
+        if not isdir(dataDir) or 'DOMAIN_PATH' not in self.envVars.keys():
             return
-        if not isdir(self.envFileDict['DOMAIN_PATH']):
-            makedirs(self.envFileDict['DOMAIN_PATH'])
-        print(copy_tree(dataDir, self.envFileDict['DOMAIN_PATH'] + '/' + webDir, preserve_mode=1, preserve_times=1, preserve_symlinks=1, update=0, verbose=1, dry_run=0))
+        if not isdir(self.envVars['DOMAIN_PATH']):
+            makedirs(self.envVars['DOMAIN_PATH'])
+        print(copy_tree(dataDir, self.envVars['DOMAIN_PATH'] + '/' + webDir, preserve_mode=1, preserve_times=1, preserve_symlinks=1, update=0, verbose=1, dry_run=0))
