@@ -5,6 +5,7 @@ from os.path import join
 from .Codeigniter import Codeigniter
 from .Collabora import Collabora
 from .FreeScout import FreeScout
+from .Leantime import Leantime
 from .LinkStack import LinkStack
 from .Module import Module
 from .Mumble import Mumble
@@ -24,6 +25,7 @@ class ModuleLoader:
         'Codeigniter': Codeigniter,
         'Collabora'  : Collabora,
         'FreeScout'  : FreeScout,
+        'Leantime'   : Leantime,
         'LinkStack'  : LinkStack,
         'Mumble'     : Mumble,
         'Nextcloud'  : Nextcloud,
