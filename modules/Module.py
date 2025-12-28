@@ -43,10 +43,6 @@ class Module:
         # Load & Update environment variables on startup
         self.envVars = self._createOrUpdateEnvFile()
 
-        # Get the http port if it exists
-        if 'HTTP_PORT' in self.envVars.keys():
-            self.exposedPort = self.envVars['HTTP_PORT']
-
     def __repr__(self):
         return type(self).__name__
 
