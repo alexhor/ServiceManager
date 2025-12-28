@@ -15,6 +15,6 @@ class FreeScout(Module):
 
     def _getCustomEnvVars(self) -> dict[str, str]:
         return {
-            'MYSQL_PASSWORD'     : self.password(),
-            'MYSQL_ROOT_PASSWORD': self.password(),
+            'MARIADB_PASSWORD'     : self.password(),
+            'MARIADB_ROOT_PASSWORD': self.password(),
         }

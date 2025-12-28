@@ -2,15 +2,15 @@
 # docker-compose file for a FreeScout installation
 services:
   db:
-    image: mariadb
+    image: mariadb:lts
     environment:
       MARIADB_DATABASE: freescout
       MARIADB_USER: freescout
-      MARIADB_PASSWORD: ${MYSQL_PASSWORD}
-      MARIADB_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
     restart: always
     volumes:
-      - ./mysql:/var/lib/mysql
+      - ./mariadb:/var/lib/mysql
 
   freescout:
     image: tiredofit/freescout:latest
@@ -22,7 +22,7 @@ services:
       DB_HOST: db
       DB_USER: freescout
       DB_NAME: freescout
-      DB_PASS: ${MYSQL_PASSWORD}
+      DB_PASS: ${MARIADB_PASSWORD}
       ENABLE_SSL_PROXY: TRUE
       SETUP_TYPE: MANUAL
       SITE_URL: ${DOMAIN_URL}
