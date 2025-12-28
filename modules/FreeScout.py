@@ -10,7 +10,7 @@ class FreeScout(Module):
         Args:
             subDomain (SubDomain): The subdomain this module is installed on
         """
-        self.requiredDirs = ['mysql', 'data']
+        self.requiredDirs = ['mariadb', 'data']
         super().__init__(subDomain)
 
     def _getCustomEnvVars(self) -> dict[str, str]:
