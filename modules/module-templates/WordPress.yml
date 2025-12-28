@@ -20,6 +20,13 @@ services:
       WORDPRESS_DB_USER: wordpress
       WORDPRESS_DB_NAME: wordpress
       WORDPRESS_DB_PASSWORD: ${MARIADB_PASSWORD}
+      MSMTP_HOST: ${SMTP_HOST}
+      MSMTP_USER: ${SMTP_USERNAME}
+      MSMTP_PASSWORD: ${SMTP_PASSWORD}
+      MSMTP_FROM: ${SMTP_FROM}
+      MSMTP_NAME: ${SMTP_FROM_NAME}
+      MSMTP_ALLOW_FROM_OVERRIDE: off
+      MSMTP_SET_FROM_HEADER: on
     networks:
       - default
       - proxy

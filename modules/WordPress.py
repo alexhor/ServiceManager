@@ -24,7 +24,11 @@ class WordPress(Module):
     def _getCustomEnvVars(self) -> dict[str, str]:
         self.exposedPort = self.getFreePort()
         return {
-            'HTTP_PORT'          : str(self.exposedPort),
             'MARIADB_PASSWORD'     : self.password(),
             'MARIADB_ROOT_PASSWORD': self.password(),
+            'SMTP_HOST'            : 'localhost',
+            'SMTP_USERNAME'        : 'root@localhost',
+            'SMTP_PASSWORD'        : 'thisisaplaceholder',
+            'SMTP_FROM'            : 'root@localhost',
+            'SMTP_FROM_NAME'       : 'WordPress',
         }
