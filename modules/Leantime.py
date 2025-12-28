@@ -37,4 +37,12 @@ class Leantime(Module):
             'LEAN_SESSION_PASSWORD'     : self.password(),
             'LEAN_SESSION_EXPIRATION'   : 28800,
             'LEAN_SESSION_SECURE'       : True,
+            # Email
+            'LEAN_EMAIL_RETURN': '',
+            'LEAN_EMAIL_USE_SMTP': False,
+            'LEAN_EMAIL_SMTP_HOSTS': '',
+            'LEAN_EMAIL_SMTP_USERNAME': '',
+            'LEAN_EMAIL_SMTP_PASSWORD': '',
+            'LEAN_EMAIL_SMTP_SECURE': 'STARTTLS',
+            'LEAN_EMAIL_SMTP_PORT': '587',
         }
