@@ -12,7 +12,7 @@ services:
     volumes:
       - ./mysql:/var/lib/mysql
   wordpress:
-    image: cr.immanuel-online.de/wordpress:latest
+    image: cr.gemeinschaft-immanuel.de/wordpress:latest
     depends_on:
       - db
     environment:
