@@ -12,6 +12,7 @@ from .Mumble import Mumble
 from .Nextcloud import Nextcloud
 from .NoneModule import NoneModule
 from .Odoo import Odoo
+from .ParseDmarc import ParseDmarc
 from .Registry import Registry
 from .UptimeKuma import UptimeKuma
 from .Webserver import Webserver
@@ -30,6 +31,7 @@ class ModuleLoader:
         'Mumble'     : Mumble,
         'Nextcloud'  : Nextcloud,
         'Odoo'       : Odoo,
+        'ParseDmarc' : ParseDmarc,
         'Registry'   : Registry,
         'UptimeKuma' : UptimeKuma,
         'Webserver'  : Webserver,
