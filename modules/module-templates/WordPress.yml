@@ -41,8 +41,23 @@ services:
   memcached:
     image: memcached
     restart: always
+  cron:
+    image: alpine
+    configs:
+      - source: crontab
+        target: /etc/crontab
+    entrypoint: crond -f
 
 networks:
   proxy:
     name: ${PROXY_NETWORK_NAME}
     external: true
+
+configs:
+  crontab:
+    # Run wp-cron every 3 minutes
+    # To disable cron jobs on page load, add
+    #   define( 'DISABLE_WP_CRON', true );
+    # to your wp_config.php
+    content: |
+      */3 * * * * wget -O - https://${DOMAIN}/wp-cron.php
