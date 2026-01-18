@@ -45,7 +45,7 @@ services:
     image: alpine
     configs:
       - source: crontab
-        target: /etc/crontab
+        target: /etc/crontabs/root
     entrypoint: crond -f
 
 networks:
@@ -60,4 +60,4 @@ configs:
     #   define( 'DISABLE_WP_CRON', true );
     # to your wp_config.php
     content: |
-      */3 * * * * wget -O - https://${DOMAIN}/wp-cron.php
+      */3 * * * * wget -O /dev/null https://${DOMAIN}/wp-cron.php
