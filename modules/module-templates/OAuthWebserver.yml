@@ -1,0 +1,64 @@
+services:
+  cdn:
+    image: nginx
+    networks:
+      - proxy
+    restart: always
+    volumes:
+      - ./data:/usr/share/nginx/html:ro
+    labels:
+      - traefik.enable=true
+      - 'traefik.http.routers.${COMPOSE_PROJECT_NAME}-cdn.rule=Host(`${DOMAIN}`)'
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-cdn.tls.certresolver=LetsEncrypt
+      # Include middlewares
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-cdn.middlewares=${COMPOSE_PROJECT_NAME}-oauth-errors,${COMPOSE_PROJECT_NAME}-oauth-auth
+      # Middleware to check authentication with the oauth-proxy service
+      - traefik.http.middlewares.${COMPOSE_PROJECT_NAME}-oauth-auth.forwardAuth.address=https://${DOMAIN}/oauth2/auth # Allows optional ?allowed_groups= parameter
+      - traefik.http.middlewares.${COMPOSE_PROJECT_NAME}-oauth-auth.forwardAuth.trustForwardHeader=true
+  oauth:
+    image: cr.gemeinschaft-immanuel.de/oauth2-proxy
+    environment:
+      OAUTH2_PROXY_HTTP_ADDRESS: "0.0.0.0:4180"
+      OAUTH2_PROXY_WHITELIST_DOMAINS: "${DOMAIN}"
+      OAUTH2_PROXY_REDIRECT_URL: "https://${DOMAIN}/oauth2/callback"
+      OAUTH2_PROXY_EMAIL_DOMAINS: "*" # Authorize anyone who can authorize with the provider
+      # The following options are set in .env file and these lines allow pass-through
+      OAUTH2_PROXY_PROVIDER:
+      OAUTH2_PROXY_PROVIDER_DISPLAY_NAME:
+      OAUTH2_PROXY_CLIENT_ID:
+      OAUTH2_PROXY_CLIENT_SECRET:
+      OAUTH2_PROXY_LOGIN_URL:
+      OAUTH2_PROXY_REDEEM_URL:
+      OAUTH2_PROXY_VALIDATE_URL:
+      OAUTH2_PROXY_COOKIE_SECRET:
+    networks:
+      - proxy
+    restart: always
+    labels:
+      - traefik.enable=true
+      - 'traefik.http.routers.${COMPOSE_PROJECT_NAME}-oauth.rule=Host(`${DOMAIN}`) && PathPrefix(`/oauth2`)'
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-oauth.tls.certresolver=LetsEncrypt
+      # Custom service name for referring to it in other configs
+      - traefik.http.services.oauth-${COMPOSE_PROJECT_NAME}.loadbalancer.server.port=4180
+      # Middleware for security-related headers
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-oauth.middlewares=${COMPOSE_PROJECT_NAME}-auth-headers
+      - traefik.http.middlewares.${COMPOSE_PROJECT_NAME}-auth-headers.headers.sslRedirect=true
+      - traefik.http.middlewares.${COMPOSE_PROJECT_NAME}-auth-headers.headers.stsSeconds=315360000
+      - traefik.http.middlewares.${COMPOSE_PROJECT_NAME}-auth-headers.headers.browserXssFilter=true
+      - traefik.http.middlewares.${COMPOSE_PROJECT_NAME}-auth-headers.headers.contentTypeNosniff=true
+      - traefik.http.middlewares.${COMPOSE_PROJECT_NAME}-auth-headers.headers.forceSTSHeader=true
+      - traefik.http.middlewares.${COMPOSE_PROJECT_NAME}-auth-headers.headers.sslHost=${DOMAIN}
+      - traefik.http.middlewares.${COMPOSE_PROJECT_NAME}-auth-headers.headers.stsIncludeSubdomains=true
+      - traefik.http.middlewares.${COMPOSE_PROJECT_NAME}-auth-headers.headers.stsPreload=true
+      - traefik.http.middlewares.${COMPOSE_PROJECT_NAME}-auth-headers.headers.frameDeny=true
+      # Middleware for redirecting "unauthorized" responses back to oauth-service IN PLACE (without client-side redirect)
+      # This middleware is patched into the cdn-service's router, however, it is defined here to facilitate overriding this template
+      # (docker-compose cannot merge lists, only keys; therefore the whole list has to be duplicated if it is to be amended)
+      - traefik.http.middlewares.${COMPOSE_PROJECT_NAME}-oauth-errors.errors.status=401-403
+      - traefik.http.middlewares.${COMPOSE_PROJECT_NAME}-oauth-errors.errors.service=oauth-${COMPOSE_PROJECT_NAME}
+      - traefik.http.middlewares.${COMPOSE_PROJECT_NAME}-oauth-errors.errors.query=/oauth2/sign_in?rd={url}
+
+networks:
+  proxy:
+    name: ${PROXY_NETWORK_NAME}
+    external: true

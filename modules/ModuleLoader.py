@@ -11,6 +11,7 @@ from .Module import Module
 from .Mumble import Mumble
 from .Nextcloud import Nextcloud
 from .NoneModule import NoneModule
+from .OAuthWebserver import OAuthWebserver
 from .Odoo import Odoo
 from .ParseDmarc import ParseDmarc
 from .Registry import Registry
@@ -23,21 +24,22 @@ from .Zammad import Zammad
 
 class ModuleLoader:
     availableModules = {
-        'Codeigniter': Codeigniter,
-        'Collabora'  : Collabora,
-        'FreeScout'  : FreeScout,
-        'Leantime'   : Leantime,
-        'LinkStack'  : LinkStack,
-        'Mumble'     : Mumble,
-        'Nextcloud'  : Nextcloud,
-        'Odoo'       : Odoo,
-        'ParseDmarc' : ParseDmarc,
-        'Registry'   : Registry,
-        'UptimeKuma' : UptimeKuma,
-        'Webserver'  : Webserver,
-        'WordPress'  : WordPress,
-        'Yopass'     : Yopass,
-        'Zammad'     : Zammad,
+        'Codeigniter'   : Codeigniter,
+        'Collabora'     : Collabora,
+        'FreeScout'     : FreeScout,
+        'Leantime'      : Leantime,
+        'LinkStack'     : LinkStack,
+        'Mumble'        : Mumble,
+        'Nextcloud'     : Nextcloud,
+        'OAuthWebserver': OAuthWebserver,
+        'Odoo'          : Odoo,
+        'ParseDmarc'    : ParseDmarc,
+        'Registry'      : Registry,
+        'UptimeKuma'    : UptimeKuma,
+        'Webserver'     : Webserver,
+        'WordPress'     : WordPress,
+        'Yopass'        : Yopass,
+        'Zammad'        : Zammad,
     }
 
     @staticmethod
