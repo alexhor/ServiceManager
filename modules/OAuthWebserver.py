@@ -1,5 +1,6 @@
 import base64
 import os
+from os.path import exists
 
 from .Module import Module
 
@@ -14,7 +15,8 @@ class OAuthWebserver(Module):
         self.requiredDirs = ['data']
         super().__init__(subDomain)
 
-        print('Please update the environment variables with your OAuth2 provider configuration!')
+        if not exists(self.envFile):
+            print('Please update the environment variables with your OAuth2 provider configuration!')
 
     def _getCustomEnvVars(self) -> dict[str, str]:
         self.exposedPort = self.getFreePort()
