@@ -2,7 +2,7 @@
 # docker-compose file for a UptimeKuma installation
 services:
   uptime_kuma:
-    image: louislam/uptime-kuma:latest
+    image: louislam/uptime-kuma:2
     networks:
       - proxy
     restart: always
