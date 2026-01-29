@@ -61,4 +61,4 @@ configs:
     #   define( 'DISABLE_WP_CRON', true );
     # to your wp_config.php
     content: |
-      */3 * * * * wget -nv -O /dev/null https://${DOMAIN}/wp-cron.php
+      */3 * * * * wget -q -O /dev/null https://${DOMAIN}/wp-cron.php
