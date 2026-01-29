@@ -46,6 +46,7 @@ services:
     configs:
       - source: crontab
         target: /etc/crontabs/root
+    restart: always
     entrypoint: crond -f
 
 networks:
