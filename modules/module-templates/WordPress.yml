@@ -43,6 +43,7 @@ services:
     restart: always
   cron:
     image: alpine
+    init: true
     configs:
       - source: crontab
         target: /etc/crontabs/root
