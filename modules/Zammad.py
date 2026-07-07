@@ -19,11 +19,8 @@ class Zammad(Module):
         chown(join(self.subDomain.rootDir, 'elasticsearch'), 1001, 1001)
 
     def _getCustomEnvVars(self) -> dict[str, str]:
-        self.exposedPort = self.getFreePort()
         return {
-            'HTTP_PORT'        : str(self.exposedPort),
-            'POSTGRES_USER'    : 'afaf',
-            'POSTGRES_PASSWORD': self.password(30),
-            'IMAGE_REPO'       : 'zammad/zammad-docker-compose',
-            'VERSION'          : '-latest',
+            'POSTGRES_USER': 'zammad',
+            'POSTGRES_PASS': self.password(30),
+            'VERSION'      : '7',
         }
