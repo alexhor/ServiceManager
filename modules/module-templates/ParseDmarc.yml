@@ -2,7 +2,7 @@
 # docker-compose file for a ParseDmarc installation
 services:
   parse-dmarc:
-    image: meysam81/parse-dmarc:latest
+    image: dmarcguard/parse-dmarc:latest
     environment:
       DATABASE_PATH: /data/parse-dmarc.db
     restart: always
