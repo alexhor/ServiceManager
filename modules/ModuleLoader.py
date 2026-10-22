@@ -15,6 +15,7 @@ from .OAuthWebserver import OAuthWebserver
 from .Odoo import Odoo
 from .ParseDmarc import ParseDmarc
 from .Registry import Registry
+from .StaticWeb import StaticWeb
 from .UptimeKuma import UptimeKuma
 from .Webserver import Webserver
 from .WordPress import WordPress
@@ -35,6 +36,7 @@ class ModuleLoader:
         'Odoo'          : Odoo,
         'ParseDmarc'    : ParseDmarc,
         'Registry'      : Registry,
+        'StaticWeb'     : StaticWeb,
         'UptimeKuma'    : UptimeKuma,
         'Webserver'     : Webserver,
         'WordPress'     : WordPress,
